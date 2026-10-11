@@ -33,3 +33,12 @@
 /* Demande de rappel guidée */
 .contact-modal{overflow-y:auto;align-items:start;place-items:start center}.contact-card{margin:24px auto;max-width:570px}.contact-card h2{margin-top:12px}.contact-card .field select{width:100%;min-height:44px;padding:10px;border:1px solid #b9c9c0;border-radius:9px;background:#fff;color:#0B493F;font:inherit}.contact-card .contact-consent{margin:15px 0;align-items:start}.contact-card .contact-consent span{font-size:.83rem;line-height:1.55}.availability-strip{padding:16px;border:1px solid #dbe7e0;background:#f5f9f6;border-radius:14px;margin:18px 0 22px}.availability-strip span{padding:0 8px;color:#C83E6A}.service-card{display:flex;flex-direction:column;align-items:flex-start}.service-card .btn{margin-top:auto;white-space:normal}.contact-card .status{min-height:1.3em;color:#9c243d}
 @media(max-width:600px){.contact-modal{padding:14px}.contact-card{margin:8px auto;padding:19px}.contact-card .actions{flex-wrap:wrap}}
+
+/* Nuancier pédagogique développé */
+.palette-card{background:#fffdfb}
+.palette-group{margin-top:12px;border:1px solid #d9e3dc;border-radius:12px;background:white;overflow:hidden}
+.palette-group summary{cursor:pointer;padding:13px 16px;font-weight:700;color:#0B493F}
+.palette-group summary small{margin-left:9px;color:#65766e;font-weight:400;font-size:.8em}
+.palette-group .color-grid{padding:2px 14px 14px;grid-template-columns:repeat(auto-fit,minmax(92px,1fr));gap:12px}
+.palette-group .color-swatch{height:82px}
+@media(max-width:600px){.palette-group .color-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}.palette-group .color-swatch{height:60px}}
