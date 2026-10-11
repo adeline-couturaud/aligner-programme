@@ -57,3 +57,22 @@
 
 /* Photos authentiques fournies par Aligner Conseil, conservées sans retouche */
 .service-card .service-photo{display:block;width:100%;height:190px;object-fit:cover;object-position:center 30%;border-radius:12px;margin-bottom:14px;background:#f4f6f3}.service-card h3{margin-top:4px}@media(max-width:650px){.service-card .service-photo{height:215px}}
+
+
+/* Enrichissement pédagogique : connaissances et observations guidées */
+.learning-card{margin:17px 0;border:1px solid #b9d6cd;border-left:4px solid #006D77;border-radius:14px;background:#f0f8f6;padding:18px;line-height:1.75}
+.learning-card strong{display:block;color:#0B493F;margin-bottom:9px}
+.learning-card p{margin:0;white-space:pre-line}
+.quick-reflection{margin:18px 0 24px;border:1px solid #d5e4dd;border-radius:15px;padding:17px;background:#f9fbf9}
+.quick-reflection legend{font-weight:700;color:#0B493F;padding:0 7px}
+.quick-reflection p{font-size:.82rem;color:#647773;margin:5px 0 12px}
+.quick-option{display:flex;align-items:flex-start;gap:11px;padding:10px 4px;cursor:pointer;line-height:1.55;font-size:.88rem}
+.quick-option input{margin-top:4px;width:18px;height:18px;accent-color:#006D77;flex:0 0 auto}
+.service-placeholder{height:175px;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:13px;text-align:center;background:linear-gradient(125deg,#e4f1ee,#f8f2e9);color:#0B493F}
+.service-placeholder strong{font:600 1.3rem Georgia,serif}
+.service-placeholder small{text-transform:uppercase;letter-spacing:.13em;font-size:.68rem}
+.package-card{display:flex;flex-direction:column;gap:10px}
+.package-card h3{font-size:1.14rem}
+.package-price{font:700 1.7rem Georgia,serif;color:#0B493F}
+.package-card small{line-height:1.65}
+.package-card .btn{margin-top:auto}
