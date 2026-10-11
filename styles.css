@@ -76,3 +76,11 @@
 .package-price{font:700 1.7rem Georgia,serif;color:#0B493F}
 .package-card small{line-height:1.65}
 .package-card .btn{margin-top:auto}
+
+/* Présentation du bilan d'image personnalisé */
+.bilan-service{display:grid;grid-template-columns:minmax(0,2fr) minmax(180px,1fr);align-items:center;gap:22px;margin-top:26px;padding:27px;border:1px solid #dce8e2;border-radius:19px;background:linear-gradient(120deg,#f5faf7,#fff8f2)}
+.bilan-service h2{margin:12px 0;color:#0B493F}
+.bilan-service p{line-height:1.75;color:#4c6059}
+.bilan-service-actions{display:flex;flex-direction:column;gap:14px;align-items:flex-start}
+.bilan-service-actions a:not(.btn){font-size:.82rem;color:#006D77}
+@media(max-width:720px){.bilan-service{grid-template-columns:1fr;padding:20px}}
