@@ -133,3 +133,25 @@
 .final-moment .btn.outline{background:transparent;border-color:#ffffff88;color:white}
 @media(max-width:860px){.situation-grid{grid-template-columns:1fr}.guided-grid{grid-template-columns:1fr}}
 @media(max-width:560px){.day-learning,.day-example{padding:17px}.learning-symbol{width:39px;height:39px}.guided-card{padding:13px}.recap-grid{grid-template-columns:1fr}.journey-recap,.final-moment{padding:19px}}
+
+/* Promesse visible dès l'accueil */
+.home-promise{padding:26px 29px 30px;margin:4px 0 25px;background:linear-gradient(115deg,#f1f8f5,#fffaf8);border:1px solid #d6e7dd;border-radius:22px}
+.home-promise h1{font-size:clamp(1.8rem,3.6vw,3rem);line-height:1.18;color:#0B493F;max-width:870px;margin:18px 0}
+.home-promise .home-hook{font-size:clamp(1.1rem,2vw,1.35rem);font-weight:750;color:#C83E6A;max-width:850px;line-height:1.55}
+.home-promise .lead{max-width:790px;color:#304b42}
+.promise-results{display:flex;gap:12px;flex-wrap:wrap;margin:19px 0}
+.promise-results span{padding:10px 13px;background:white;border:1px solid #d6e7dd;border-radius:11px;font-size:.8rem;font-weight:650;color:#0B493F}
+.home-assurance{font-size:.87rem;line-height:1.65;color:#456653;max-width:780px}
+.home-promise .btn{margin-top:9px}
+/* Moment fondateur : trois mots pour les vingt et un jours */
+.three-words-feature{margin:23px 0 7px;padding:24px;border:2px solid #C83E6A;background:linear-gradient(135deg,#fff7fa,#fff);border-radius:18px;box-shadow:0 12px 27px #c83e6a13}
+.three-words-head{display:flex;gap:14px;align-items:start}
+.three-words-head>span{display:grid;place-items:center;flex:none;height:42px;width:42px;background:#C83E6A;color:white;border-radius:13px;font-size:1.5rem}
+.three-words-feature h3{font-family:Georgia,serif;font-size:1.45rem;line-height:1.35;color:#0B493F;margin:0 0 7px}
+.three-words-head p{line-height:1.6;font-size:.88rem;color:#4c6059;margin:0}
+.three-words-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px;margin:19px 0 8px}
+.three-words-grid .field{margin:7px 0}
+.three-words-grid input{font-size:1.02rem;border:1.5px solid #d9acbc;font-weight:650}
+.three-words-grid input:focus{border-color:#C83E6A;box-shadow:0 0 0 3px #c83e6a1e}
+.word-feedback{font-size:.81rem;color:#9a3458;margin:12px 0 0;font-weight:650}
+@media(max-width:720px){.home-promise{padding:22px 18px}.three-words-feature{padding:18px}.three-words-grid{grid-template-columns:1fr;gap:6px}}
