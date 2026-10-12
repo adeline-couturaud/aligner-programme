@@ -234,3 +234,10 @@ body.bilan-print-open{overflow:hidden}
  #bilan-print-overlay .bilan-print-photos{break-before:page;margin:0;padding:0}
  #bilan-print-overlay .bilan-print-photo-grid img{max-height:220px}
 }
+
+/* Photos des prestations, les fichiers seront chargés dès leur ajout dans assets */
+.service-card .service-placeholder[hidden]{display:none!important}
+.service-card .service-photo[hidden]{display:none!important}
+.bilan-photo-frame{margin:0 0 18px;max-width:510px}
+.bilan-photo-frame[hidden]{display:none!important}
+.bilan-photo-frame img{display:block;width:100%;max-height:270px;object-fit:contain;object-position:center;border-radius:13px;background:#f0f5f1}
