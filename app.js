@@ -282,7 +282,60 @@ function servicesHTML(){
  ];
  return `<span class="badge rose">POUR ALLER PLUS LOIN</span><h1>Un accompagnement qui vous ressemble</h1><p class="lead">Ce carnet est un parcours complet en autonomie. Si vous souhaitez un regard individualisé sur vos couleurs, votre style ou votre présence, Aligner Conseil propose également des séances et des accompagnements plus complets, sans obligation.</p><div class="services-scroll-hint"><div class="scroll-hint-main"><span class="scroll-hint-icon" aria-hidden="true">↓</span><div><strong>La page continue plus bas !</strong><p>Découvrez toutes mes prestations, du bilan d’image aux accompagnements complets. Faites défiler pour ne rien manquer.</p></div></div><button type="button" class="btn small outline" data-scroll-target="packages-section">Voir les accompagnements complets ↓</button></div><section class="adeline-services"><img src="assets/portrait-accueil.png" alt="Adeline, fondatrice d’Aligner Conseil"><div><strong>Bonjour, je suis Adeline.</strong><p>Chaque parcours est différent. Vous pouvez simplement profiter de votre carnet, ou choisir un échange pour approfondir ce qui compte pour vous.</p></div></section><div class="availability-strip"><strong>En visio :</strong> partout en France <span>·</span> <strong>En présentiel :</strong> Tours, Blois et alentours selon disponibilités</div><section class="bilan-service"><div><span class="badge rose">UN PREMIER REGARD PROFESSIONNEL</span><h2>Votre bilan d’image personnalisé</h2><p>Vous avez envie d’y voir plus clair sur votre image, votre posture ou ce que vous souhaitez transmettre ? Ce bilan individuel, proposé dans les prestations à la carte sous le nom de <strong>Diagnostic image &amp; posture</strong>, permet de faire le point ensemble sur vos besoins et de définir les pistes adaptées à votre situation.</p><p class="muted">Une séance d’environ 1 h 30 avec Adeline. Contrairement au bilan style inclus dans votre carnet, ce rendez-vous repose sur un échange et un regard professionnel individualisé.</p></div><div class="bilan-service-actions"><button class="btn pink" data-open-request="Bilan d’image personnalisé">Je découvre mon bilan d’image</button><a href="https://alignerconseil.fr/#individuel" target="_blank" rel="noopener noreferrer">Consulter les modalités sur mon site ↗</a></div></section><h2 style="margin:28px 0 14px">Une question précise ?</h2><div class="grid">${offerings.map(([name,desc,img,visual])=>`<article class="card service-card">${img?`<img class="service-photo" loading="lazy" src="${esc(img)}" alt="Colorimétrie avec des tissus réels chez Aligner Conseil">`:`<div class="service-placeholder"><strong>${esc(name)}</strong><small>${esc(visual)}</small></div>`}<h3>${esc(name)}</h3><p>${esc(desc)}</p><button class="btn small outline" data-open-request="${esc(name)}">En parler avec Adeline</button></article>`).join('')}</div><h2 id="packages-section" style="margin:34px 0 10px">Mes accompagnements complets</h2><p class="lead">Un diagnostic personnalisé, des conseils adaptés à votre style et, selon la formule, un shooting photo avec un photographe professionnel.</p><div class="grid">${packages.map(([name,desc,detail],i)=>`<article class="card package-card"><span class="badge ${i===1?'rose':''}">${i===0?'Se découvrir':i===1?'Style & photographie':'Projet professionnel'}</span><h3>${esc(name)}</h3><p>${esc(desc)}</p><small>${esc(detail)}</small><button class="btn small ${i===1?'pink':'outline'}" data-open-request="${esc(name)}">Découvrir cette formule</button></article>`).join('')}</div><p class="muted" style="margin-top:14px">Les prestations détaillées, les tarifs et les modalités pratiques sont disponibles sur le site Aligner Conseil. Les disponibilités du photographe sont à confirmer lors de l’échange.</p><a class="btn outline" href="https://alignerconseil.fr/#individuel" target="_blank" rel="noopener noreferrer">Voir les prestations sur Aligner Conseil ↗</a><div class="community"><h2>On en parle ?</h2><p>Choisissez le sujet ou la formule qui vous intéresse et votre préférence de contact : email, téléphone ou SMS. Votre demande n’engage à aucune réservation ni paiement.</p><button class="btn pink" data-open-request="">Je souhaite être recontactée</button></div>`;
 }
-function exportBilan(){const picks=[1,8,14,15,19,21];const parts=picks.map(n=>{const d=D(n),e=entry(n);return `<section><h2>Jour ${fmt(n)} · ${esc(d.title)}</h2>${d.prompts.map((p,i)=>`<p><strong>${esc(p)}</strong><br>${esc(e.answers?.[i]||'Non complété').replace(/\n/g,'<br>')}</p>`).join('')}</section>`}).join('');const markup=`<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>Ma signature style · Mon Carnet Aligné</title><style>body{max-width:750px;margin:45px auto;padding:0 24px;color:#183e38;font:16px/1.6 Georgia,serif}h1{font-size:36px}h2{font-size:21px;color:#0b493f}section{border-top:1px solid #d4ddd7;padding:15px 0}strong{font-family:Arial,sans-serif;font-size:13px}header{border-bottom:4px solid #0b493f;padding-bottom:20px}.note{color:#66736d;font-size:13px}@media print{body{margin:12mm auto}section{break-inside:avoid}}</style></head><body><header><small>ALIGNER CONSEIL · BILAN PERSONNEL</small><h1>Ma signature style</h1><p>Mon carnet Aligné · 21 jours pour mieux comprendre mon style.</p></header>${parts}<p class="note">Document privé constitué de vos propres réponses. Les photos ne sont pas intégrées à cet export.</p></body></html>`;downloadBlob('ma-signature-style.html',markup,'text/html;charset=utf-8')}
+
+function exportBilan(){
+ const source=document.querySelector('.bilan-sheet');
+ if(!source){toast('Le bilan est indisponible.');return}
+ const sheet=source.cloneNode(true);
+ sheet.querySelectorAll('button').forEach(el=>el.remove());
+ const photosEnabled=!!document.querySelector('#bilanPhotos')?.checked;
+ const selected=photosEnabled?Object.values(state.photos||{}).flat().filter(p=>p.url).slice(0,6):[];
+ const photoHTML=selected.length?'<section class="bilan-print-photos"><h2>Mes souvenirs en images</h2><div class="bilan-print-photo-grid">'+selected.map(p=>'<figure><img src="'+esc(p.url)+'" alt="Ma photo du jour '+esc(p.day)+'"><figcaption>Jour '+fmt(p.day)+'</figcaption></figure>').join('')+'</div></section>':'';
+ const styles=[
+ 'body{margin:0;padding:28px;background:#eef3ef;color:#24413a;font:15px/1.55 Arial,sans-serif}',
+ '*{box-sizing:border-box}',
+ '.print-controls{max-width:820px;margin:0 auto 20px;padding:17px;background:#fff;border-radius:12px;display:flex;justify-content:space-between;align-items:center;gap:18px}',
+ '.print-controls button{background:#0B493F;color:#fff;border:0;border-radius:9px;padding:13px 17px;cursor:pointer;font-weight:700}',
+ '.bilan-sheet{max-width:820px;margin:auto;background:#fff;padding:34px;box-shadow:0 8px 30px #0001}',
+ '.bilan-hero{background:#0B493F;color:#fff;padding:34px;border-radius:15px}',
+ '.bilan-hero-eyebrow{font-size:11px;letter-spacing:1.7px}',
+ '.bilan-hero h1{font:normal 42px Georgia,serif;margin:14px 0}',
+ '.bilan-hero p{line-height:1.65}',
+ '.bilan-identity{display:flex;flex-wrap:wrap;gap:14px;font-size:12px;margin-top:21px}',
+ '.bilan-identity span{border:1px solid #abc2b7;border-radius:9px;padding:7px 10px}',
+ '.bilan-section{margin-top:28px}',
+ '.bilan-section-heading{display:flex;gap:12px;align-items:flex-start;margin-bottom:13px}',
+ '.bilan-section-heading>span{background:#e6f2ec;color:#0B493F;border-radius:9px;padding:9px;font-weight:700}',
+ '.bilan-section-heading h2{font:normal 23px Georgia,serif;color:#0B493F;margin:2px 0 5px}',
+ '.bilan-section-heading p{font-size:13px;color:#657a70;margin:0}',
+ '.bilan-card-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}',
+ '.bilan-item{border:1px solid #dce6e0;border-radius:9px;padding:14px;break-inside:avoid;min-width:0}',
+ '.bilan-item-heading{display:flex;align-items:baseline;justify-content:space-between;gap:9px}',
+ '.bilan-item h3{font-size:13px;color:#0B493F;margin:0}',
+ '.bilan-item-heading span{white-space:nowrap;color:#708378;font-size:9px}',
+ '.bilan-item p{font-size:13px;margin:10px 0 0;overflow-wrap:anywhere;line-height:1.6}',
+ '.bilan-item.to-complete{background:#f6f8f6}',
+ '.bilan-pending{font-style:italic;color:#84958a}',
+ '.bilan-closing{margin-top:22px;border-radius:12px;padding:19px;background:#eff6f2;break-inside:avoid}',
+ '.bilan-closing p{font:italic 18px/1.6 Georgia,serif;color:#0B493F;margin:5px 0}',
+ '.bilan-print-photos{max-width:820px;margin:20px auto;background:white;padding:26px}',
+ '.bilan-print-photos h2{color:#0B493F;font:normal 24px Georgia,serif}',
+ '.bilan-print-photo-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}',
+ '.bilan-print-photo-grid figure{margin:0;break-inside:avoid}',
+ '.bilan-print-photo-grid img{max-width:100%;width:100%;max-height:255px;object-fit:contain}',
+ '.bilan-print-photo-grid figcaption{color:#66776e;font-size:11px}',
+ '.print-note{max-width:820px;margin:20px auto;color:#63776c;font-size:12px;text-align:center}',
+ '@page{size:A4;margin:14mm}',
+ '@media print{body{padding:0;background:white;print-color-adjust:exact;-webkit-print-color-adjust:exact}.print-controls,.print-note{display:none}.bilan-sheet{box-shadow:none;padding:0;max-width:none}.bilan-hero{border-radius:0}.bilan-section{margin-top:22px}.bilan-print-photos{padding:16px 0;max-width:none}}'
+ ].join('\n');
+ const markup='<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>Ma boussole style | Aligner Conseil</title><style>'+styles+'</style></head><body>'+
+ '<div class="print-controls"><p>Votre bilan est prêt. Cliquez sur « Imprimer » puis choisissez « Enregistrer en PDF ».</p><button onclick="window.print()">Imprimer / Enregistrer en PDF</button></div>'+
+ sheet.outerHTML+photoHTML+'<p class="print-note">Synthèse personnelle des réponses de Mon Carnet Aligné. Ne constitue pas un diagnostic professionnel individualisé.</p></body></html>';
+ const win=window.open('','_blank');
+ if(!win){toast('Autorisez l’ouverture d’une nouvelle fenêtre pour imprimer votre bilan.');return}
+ win.document.open();win.document.write(markup);win.document.close();win.focus();
+}
+
 function communityHTML(){return `<span class="badge rose">ENTRE NOUS</span><h1>Le Cercle Aligné</h1><p class="lead">Un espace d'échanges, de petits défis et de soutien mutuel. Les membres peuvent partager leurs photos ou leurs découvertes si elles le souhaitent. La participation est facultative.</p><div class="grid"><div class="card"><h3>Bienveillance</h3><p>On commente les idées, pas les corps. Aucun jugement, aucune comparaison.</p></div><div class="card"><h3>Choix du partage</h3><p>Aucune obligation de montrer son visage ni sa tenue. On peut participer avec des mots seulement.</p></div><div class="card"><h3>Pas de diagnostic collectif</h3><p>Les échanges ne remplacent ni un draping professionnel ni un rendez-vous individuel.</p></div></div><div class="community"><h2>Rejoindre la communauté WhatsApp</h2>${(LIVE?state.whatsappInviteUrl:CFG.whatsappInviteUrl)?`<p>Le groupe est facultatif. Avant de rejoindre : les autres membres d'un groupe peuvent voir votre numéro et les contenus que vous publiez.</p><a class="btn" target="_blank" rel="noopener noreferrer" href="${esc(LIVE?state.whatsappInviteUrl:CFG.whatsappInviteUrl)}">Rejoindre le Cercle Aligné ↗</a>`:`<p>Le lien d'accès sera ajouté après la création et la modération du groupe. Le programme reste accessible sans WhatsApp.</p><span class="badge gold">Communauté en préparation</span>`}</div><h2 style="margin-top:30px">Règles du Cercle</h2><p class="lead">Pas de capture ni de transfert des photos des autres. Pas de publicité ni de sollicitation privée sans accord. On respecte la confidentialité des échanges. Adeline anime la communauté sans garantir une réponse personnelle à chaque publication.</p>`}
 function profileHTML(){const count=Object.values(state.entries).filter(e=>e.shared_with_adeline).length;
 return `<span class="badge">CONFIDENTIALITÉ ET PRÉFÉRENCES</span><h1>Mon espace personnel</h1>
