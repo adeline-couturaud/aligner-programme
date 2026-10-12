@@ -164,3 +164,39 @@
 .services-scroll-hint p{color:#536862;line-height:1.55;margin:5px 0 0;font-size:.82rem}
 #packages-section{scroll-margin-top:24px}
 @media(max-width:720px){.services-scroll-hint{padding:16px}.services-scroll-hint .btn{width:100%}}
+
+/* Boussole style, restitution personnalisée */
+.bilan-sheet{background:#fff;border:1px solid #d6e5db;border-radius:20px;overflow:hidden;margin:22px 0 25px}
+.bilan-hero{background:#0B493F;color:#fff;padding:33px 33px 35px}
+.bilan-hero-eyebrow{letter-spacing:.12em;font-size:.7rem;color:#d7ebe0;font-weight:750}
+.bilan-hero h1{font:normal clamp(2rem,4vw,2.9rem) Georgia,serif;color:#fff;margin:14px 0}
+.bilan-hero p{color:#e3f1ea;line-height:1.7;max-width:650px;margin:0}
+.bilan-identity{display:flex;flex-wrap:wrap;gap:12px;margin-top:21px}
+.bilan-identity span{border:1px solid #a8c5b7;padding:7px 12px;border-radius:12px;font-size:.8rem}
+.bilan-section{padding:27px 28px;border-bottom:1px solid #e5ede7}
+.bilan-section:last-child{border-bottom:0}
+.bilan-section-heading{display:flex;align-items:flex-start;gap:13px;margin-bottom:17px}
+.bilan-section-heading>span{flex:none;display:grid;place-items:center;width:40px;height:40px;border-radius:12px;background:#e9f4ed;color:#0B493F;font-weight:750}
+.bilan-section-heading h2{font:normal 1.45rem Georgia,serif;color:#0B493F;margin:0 0 6px}
+.bilan-section-heading p{margin:0;color:#64776b;line-height:1.55;font-size:.86rem}
+.bilan-card-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.bilan-item{border:1px solid #dce9e0;padding:17px;border-radius:13px;min-width:0;display:flex;flex-direction:column}
+.bilan-item-heading{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.bilan-item h3{font-size:.91rem;color:#0B493F;margin:0}
+.bilan-item-heading span{font-size:.65rem;color:#7c9486;white-space:nowrap;font-weight:700}
+.bilan-item p{margin:12px 0 16px;line-height:1.7;overflow-wrap:anywhere;white-space:normal}
+.bilan-item.to-complete{background:#f7faf7}
+.bilan-pending{font-style:italic;color:#6a7e71}
+.bilan-edit{border:0;background:transparent;padding:2px 0;margin-top:auto;text-align:left;cursor:pointer;color:#006D77;font:700 .8rem Arial,sans-serif}
+.bilan-edit:hover{text-decoration:underline}
+.bilan-closing{background:#eff7f2;border-radius:14px;padding:21px;margin-top:22px}
+.bilan-closing span{color:#C83E6A;font-size:1.4rem}
+.bilan-closing p{font:italic 1.08rem/1.7 Georgia,serif;color:#0B493F;margin:7px 0}
+.bilan-export-panel{border-radius:17px;border:1px solid #d4e3da;padding:22px 25px;display:flex;justify-content:space-between;align-items:center;gap:22px;flex-wrap:wrap;background:#f5f9f5}
+.bilan-export-panel>div:first-child{flex:2;min-width:220px}
+.bilan-export-panel h2{margin:0 0 8px;color:#0B493F}
+.bilan-export-panel p{line-height:1.7;margin:8px 0}
+.bilan-export-actions{flex:1;min-width:200px}
+.bilan-photo-consent{display:flex;gap:10px;align-items:center;font-weight:600;line-height:1.5;margin:14px 0}
+.bilan-photo-consent input{flex:none}
+@media(max-width:720px){.bilan-hero{padding:26px 19px}.bilan-section{padding:23px 16px}.bilan-card-grid{grid-template-columns:1fr}.bilan-export-panel{padding:18px}}
