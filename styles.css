@@ -200,3 +200,37 @@
 .bilan-photo-consent{display:flex;gap:10px;align-items:center;font-weight:600;line-height:1.5;margin:14px 0}
 .bilan-photo-consent input{flex:none}
 @media(max-width:720px){.bilan-hero{padding:26px 19px}.bilan-section{padding:23px 16px}.bilan-card-grid{grid-template-columns:1fr}.bilan-export-panel{padding:18px}}
+
+/* Aperçu imprimable intégré, sans nouvel onglet */
+body.bilan-print-open{overflow:hidden}
+#bilan-print-overlay{position:fixed;z-index:99999;inset:0;overflow:auto;background:#ecf2ed;color:#24413a}
+.bilan-print-toolbar{position:sticky;z-index:2;top:0;display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap;background:#fff;box-shadow:0 3px 15px #132d2319;padding:15px 25px}
+.bilan-print-toolbar strong{color:#0B493F}
+.bilan-print-toolbar p{color:#536860;font-size:.81rem;margin:5px 0 0;line-height:1.55}
+.bilan-print-actions{display:flex;gap:12px;flex-wrap:wrap}
+.bilan-print-content{max-width:900px;margin:25px auto;padding:0 12px 35px}
+.bilan-print-content .bilan-sheet{background:#fff;box-shadow:0 4px 25px #19352a16;margin:0}
+.bilan-print-photos{margin-top:18px;padding:22px;background:#fff;border-radius:14px}
+.bilan-print-photos h2{color:#0B493F}
+.bilan-print-photo-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}
+.bilan-print-photo-grid figure{margin:0;break-inside:avoid}
+.bilan-print-photo-grid img{width:100%;height:auto;max-height:280px;object-fit:contain;display:block}
+.bilan-print-photo-grid figcaption{color:#526b5d;font-size:.8rem;margin-top:5px}
+.bilan-print-disclaimer{font-size:.75rem;color:#647b6f;text-align:center;padding:15px}
+@media(max-width:640px){.bilan-print-toolbar{padding:12px}.bilan-print-actions{width:100%}.bilan-print-actions .btn{flex:1}.bilan-print-photo-grid{grid-template-columns:1fr}}
+@page{size:A4;margin:13mm}
+@media print{
+ html,body{background:white!important;overflow:visible!important}
+ body.bilan-print-open #app{display:none!important}
+ body.bilan-print-open #bilan-print-overlay{position:static!important;inset:auto!important;overflow:visible!important;background:white!important}
+ #bilan-print-overlay .bilan-print-toolbar{display:none!important}
+ #bilan-print-overlay .bilan-print-content{max-width:none!important;padding:0!important;margin:0!important}
+ #bilan-print-overlay .bilan-sheet{border:0!important;box-shadow:none!important;margin:0!important;overflow:visible!important}
+ #bilan-print-overlay .bilan-hero{print-color-adjust:exact;-webkit-print-color-adjust:exact}
+ #bilan-print-overlay .bilan-section{break-inside:auto}
+ #bilan-print-overlay .bilan-item{break-inside:avoid}
+ #bilan-print-overlay .bilan-edit{display:none!important}
+ #bilan-print-overlay .bilan-print-disclaimer{font-size:9pt}
+ #bilan-print-overlay .bilan-print-photos{break-before:page;margin:0;padding:0}
+ #bilan-print-overlay .bilan-print-photo-grid img{max-height:220px}
+}
