@@ -155,3 +155,12 @@
 .three-words-grid input:focus{border-color:#C83E6A;box-shadow:0 0 0 3px #c83e6a1e}
 .word-feedback{font-size:.81rem;color:#9a3458;margin:12px 0 0;font-weight:650}
 @media(max-width:720px){.home-promise{padding:22px 18px}.three-words-feature{padding:18px}.three-words-grid{grid-template-columns:1fr;gap:6px}}
+
+/* Incitation au défilement des prestations */
+.services-scroll-hint{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;padding:17px 20px;margin:22px 0 25px;background:#f1f7f5;border:1px solid #bdd7cf;border-radius:15px}
+.scroll-hint-main{display:flex;align-items:center;gap:13px;flex:1;min-width:200px}
+.scroll-hint-icon{display:grid;place-items:center;flex:none;width:42px;height:42px;border-radius:50%;background:#0B493F;color:#fff;font-size:1.5rem}
+.services-scroll-hint strong{color:#0B493F;font-size:.94rem}
+.services-scroll-hint p{color:#536862;line-height:1.55;margin:5px 0 0;font-size:.82rem}
+#packages-section{scroll-margin-top:24px}
+@media(max-width:720px){.services-scroll-hint{padding:16px}.services-scroll-hint .btn{width:100%}}
