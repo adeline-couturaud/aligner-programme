@@ -85,7 +85,7 @@ function scheduleSave(){state.dirty=true;if(isDemo())persistDemo();clearTimeout(
 async function threeWords(){const g=entry(1).answers?.guided||{};const split=String(g.three_words||'').split(/[,;\n]+/).map(x=>x.trim()).filter(Boolean);return [g.word1||split[0]||'',g.word2||split[1]||'',g.word3||split[2]||''].map(x=>String(x).trim())}
 function startWordsValid(){return threeWords().every(w=>w.length>0)}
 function requireThreeWords(){if(startWordsValid())return true;state.view='day';state.day=1;render();requestAnimationFrame(()=>{const f=document.querySelector('[data-word]');f?.scrollIntoView({behavior:'smooth',block:'center'});f?.focus()});toast('Pour continuer, choisissez vos trois mots du jour 1. Ils vous accompagneront tout au long du parcours.');return false}
-async function goto(view,day){if((view==='day'&&Number(day)>1||view==='days')&&!startWordsValid()&&state.role!=='admin'){if(!requireThreeWords())return}clearTimeout(timer);await saveEntry();state.view=view;if(day)state.day=day;render();window.scrollTo({top:0,behavior:'instant'})}
+async function goto(view,day){if((view==='day'&&Number(day)>1||view==='days')&&!startWordsValid()&&state.role!=='admin'){if(!requireThreeWords())return}clearTimeout(timer);await saveEntry();state.view=view;if(day)state.day=day;render();window.scrollTo(0,0)}
 function completedCount(){return Object.values(state.entries).filter(e=>e.completed).length}
 function layout(inner){
  const pro=(state.role==='admin'&&LIVE)||state.view==='admin';
