@@ -84,3 +84,52 @@
 .bilan-service-actions{display:flex;flex-direction:column;gap:14px;align-items:flex-start}
 .bilan-service-actions a:not(.btn){font-size:.82rem;color:#006D77}
 @media(max-width:720px){.bilan-service{grid-template-columns:1fr;padding:20px}}
+
+
+/* Trame pédagogique cohérente sur les 21 journées */
+.day-intro{margin:20px 0 22px;padding:18px 22px;border-left:3px solid #456653;background:#f7faf8;border-radius:0 13px 13px 0}
+.day-intro p{line-height:1.75;margin:0}
+.day-learning{margin:22px 0;background:#ebf5f2;border:1px solid #c9ded5;border-left:5px solid #006D77;border-radius:16px;padding:23px 25px;box-shadow:0 4px 16px #0b493f0b}
+.learning-title{display:flex;gap:14px;align-items:center;margin-bottom:13px}
+.learning-symbol{width:47px;height:47px;flex:none;background:#006D77;color:white;display:grid;place-items:center;font:700 1.65rem Georgia,serif;border-radius:14px}
+.eyebrow{font-size:.65rem;font-weight:800;letter-spacing:.16em;color:#006D77}
+.day-learning h2{margin:4px 0 0;color:#0B493F;font-size:1.45rem}
+.day-learning>p{line-height:1.85;margin:0;color:#28483f}
+.day-example{margin:20px 0 24px;padding:21px 23px;border:1px solid #e8d8bd;background:#fffaf1;border-radius:16px}
+.example-head{display:flex;align-items:center;gap:11px;margin-bottom:9px}
+.example-head h3{margin:0;font-size:1.05rem;font-family:'DM Sans',sans-serif;color:#0B493F}
+.example-symbol{width:34px;height:34px;border-radius:50%;background:#efaF21;color:#143c33;display:grid;place-items:center;font-weight:800}
+.day-example>p{margin:0;line-height:1.78}
+.example-photo{margin:18px 0 0}
+.example-photo img{display:block;width:100%;max-height:260px;object-fit:cover;border-radius:13px}
+.example-photo figcaption{font-size:.75rem;color:#647773;margin-top:8px}
+.experience-card{border-top:4px solid #0B493F}
+.experience-card .section-title span{color:#C83E6A;padding-right:7px}
+.guided-card{border:1px solid #c6ded5;background:#f4faf7;padding:18px;border-radius:16px;margin:20px 0}
+.guided-card h3{margin:0 0 13px;color:#0B493F;font-size:1.03rem}
+.guided-card>.muted{margin-bottom:10px}
+.guided-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:18px}
+.guided-field{margin:10px 0}
+.situation-card{margin:15px 0;padding:14px 16px;background:white;border:1px solid #dfe8e2;border-radius:13px}
+.situation-card h4{margin:0 0 8px;color:#006D77}
+.situation-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.guided-field input{min-width:0}
+.day-reference{display:flex;gap:15px;align-items:flex-start;margin:22px 0;background:#fff6f9;border:1px solid #f4dae3;border-radius:15px;padding:18px}
+.day-reference>div{min-width:0}
+.day-reference strong{color:#0B493F}
+.day-reference p{margin:7px 0;line-height:1.7}
+.reference-icon{width:37px;height:37px;flex:none;background:#C83E6A;color:#fff;display:grid;place-items:center;border-radius:50%;font-size:1.3rem}
+.journey-recap{margin:25px 0;border-radius:17px;padding:24px;background:#f2f7f4;border:1px solid #d2e2d8}
+.journey-recap h2{color:#0B493F}
+.journey-recap>p{line-height:1.7}
+.recap-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+.recap-grid>div{padding:17px;border-radius:12px;background:white;border:1px solid #e0ebe4}
+.recap-grid small{color:#006D77;font-weight:700}
+.recap-grid p{margin:9px 0 0;line-height:1.65;overflow-wrap:anywhere}
+.final-moment{margin:25px 0;padding:27px;border-radius:20px;background:#0B493F;color:white}
+.final-moment h2{color:white}
+.final-moment p{font:1.1rem/1.85 Georgia,serif}
+.final-moment .btn{background:#fff;color:#0B493F}
+.final-moment .btn.outline{background:transparent;border-color:#ffffff88;color:white}
+@media(max-width:860px){.situation-grid{grid-template-columns:1fr}.guided-grid{grid-template-columns:1fr}}
+@media(max-width:560px){.day-learning,.day-example{padding:17px}.learning-symbol{width:39px;height:39px}.guided-card{padding:13px}.recap-grid{grid-template-columns:1fr}.journey-recap,.final-moment{padding:19px}}
