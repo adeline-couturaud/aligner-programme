@@ -196,7 +196,79 @@ function dayHTML(){
  ([5,10,17].includes(d.day)?'<section class="community"><h2>Et si vous souhaitiez approfondir ce sujet ?</h2><p>'+(d.day===5?'Cette première exploration vous donne des repères. Une séance de colorimétrie personnalisée permet d’aller plus loin avec des comparaisons guidées, une analyse professionnelle et des conseils adaptés à votre visage.':d.day===10?'Ces premiers essais vous aident à observer les lignes et les volumes. Un accompagnement morphostyle permet d’approfondir vos préférences et de trouver ensemble des coupes qui vous ressemblent.':'Cet exercice est un premier pas vers une présence plus assurée. Un accompagnement individuel vous permet de travailler votre posture et votre aisance à l’oral grâce à des conseils personnalisés.')+'</p><button class="btn pink" data-open-request="">J’aimerais être recontactée</button><button class="btn outline" data-nav="services">Découvrir les accompagnements</button></section>':'');
 }
 
-function bilanHTML(){const completed=completedCount();const picks=[[1,'Mon point de départ'],[8,'Mes trois mots de style'],[14,'Ma signature personnelle'],[15,'Ce que j’aime révéler de moi'],[19,'Ma mini-capsule'],[21,'Mes progrès et mes prochaines habitudes']];return `<span class="badge rose">MON BILAN PERSONNEL</span><h1>Ma signature style</h1><p class="lead">Un résumé de ce que vous avez découvert et construit tout au long de votre parcours. Il n’y a pas de bonne ou de mauvaise réponse : ce bilan rassemble vos propres repères.</p><div class="card"><div class="stat-label">MON PARCOURS</div><span class="stat-num">${completed} / 21</span><p>journées terminées</p><button class="btn" id="downloadBilan">Télécharger mon bilan imprimable</button><p class="muted">Le fichier HTML peut être ouvert puis imprimé ou enregistré en PDF. Il contient vos textes, mais pas vos photos : celles-ci restent dans votre espace privé et peuvent être téléchargées séparément.</p></div>${picks.map(([n,title])=>{const d=D(n),e=entry(n);return `<section class="card" style="margin-top:16px"><span class="badge">JOUR ${fmt(n)}</span><h3>${esc(title)}</h3>${d.prompts.map((p,i)=>`<p><strong>${esc(p)}</strong><br>${esc(e.answers?.[i]||'À compléter quand vous serez prête.')}</p>`).join('')}</section>`}).join('')}<div class="community"><h2>Pour aller plus loin, si vous le souhaitez</h2><p>Le carnet est complet en lui-même. Une séance individuelle peut permettre d'approfondir la colorimétrie, les coupes ou la présence professionnelle, avec un accompagnement adapté à votre situation.</p><div class="actions"><button class="btn pink" data-nav="services">Être recontactée</button><button class="btn outline" data-nav="services">Découvrir les accompagnements</button></div></div>`}
+
+function bilanAnswer(day,index=0){const a=entry(day).answers?.[index];return typeof a==='string'?a.trim():'';}
+function bilanGuided(day,key){const a=entry(day).answers?.guided?.[key];return typeof a==='string'?a.trim():'';}
+function bilanWords(){const a=['style_word1','style_word2','style_word3'].map(k=>bilanGuided(8,k)).filter(Boolean);return a.length?a.join(' · '):bilanAnswer(8,0)}
+function bilanPick(day){const d=D(day),ids=Array.isArray(entry(day).answers?.quick)?entry(day).answers.quick:[];return d?.checklist?.options?ids.filter(i=>Number.isInteger(i)&&i>=0&&i<d.checklist.options.length).map(i=>d.checklist.options[i]).join(' ; '):''}
+function bilanNotes(){
+ return {
+  firstWords:threeWords().filter(Boolean).join(' · '),initial:bilanAnswer(1,0),
+  favorite:bilanGuided(2,'favorite_piece')||bilanAnswer(2,0),
+  colors:[bilanGuided(5,'favorite_color'),bilanGuided(5,'worn_color')].filter(Boolean).join(' / '),
+  neutral:bilanAnswer(6,0),material:bilanAnswer(11,0)||bilanAnswer(11,1),
+  style:bilanWords(),universes:bilanPick(8),lines:bilanAnswer(10,0),
+  signature:bilanAnswer(14,0),details:bilanAnswer(13,1),highlights:bilanAnswer(15,0),
+  capsule:bilanAnswer(19,0),weekly:bilanAnswer(20,0),
+  progress:bilanAnswer(21,0)||bilanAnswer(7,0),habit:bilanAnswer(21,1),
+  future:bilanGuided(21,'letter_future')
+ };
+}
+function bilanCard(title,value,day,help){
+ const hasValue=!!String(value||'').trim();
+ return '<article class="bilan-item'+(hasValue?'':' to-complete')+'"><div class="bilan-item-heading"><h3>'+esc(title)+'</h3><span>JOUR '+fmt(day)+'</span></div>'+
+ (hasValue?'<p>'+esc(value).replace(/\n/g,'<br>')+'</p>':'<p class="bilan-pending">'+esc(help||'Votre découverte apparaîtra ici après cet exercice.')+'</p>')+
+ '<button type="button" class="bilan-edit" data-day="'+day+'">'+(hasValue?'Retrouver mon exercice':'Compléter cette découverte')+' ↗</button></article>';
+}
+function bilanHTML(){
+ const a=bilanNotes(),completed=completedCount(),photos=Object.values(state.photos||{}).flat();
+ const displayName=String(state.displayName||'').trim();
+ return '<span class="badge rose">MON BILAN PERSONNEL</span>'+
+ '<div class="bilan-sheet">'+
+ '<section class="bilan-hero"><div class="bilan-hero-eyebrow">ALIGNER CONSEIL · MON CARNET ALIGNÉ</div><h1>Ma boussole style</h1>'+
+ '<p>Mon guide personnel pour retrouver ce qui me ressemble, choisir mes tenues avec plus de liberté et faire vivre mes découvertes au quotidien.</p>'+
+ '<div class="bilan-identity">'+(displayName?'<span>Mon carnet : '+esc(displayName)+'</span>':'<span>Mon carnet personnel</span>')+
+ '<span>'+completed+' journée'+(completed>1?'s':'')+' explorée'+(completed>1?'s':'')+' sur 21</span></div></section>'+
+ '<section class="bilan-section"><div class="bilan-section-heading"><span>01</span><div><h2>Ce qui compte pour moi</h2><p>Mes envies de départ, mes repères et ce que j’aime déjà porter.</p></div></div>'+
+ '<div class="bilan-card-grid">'+
+ bilanCard('Mes trois mots de départ',a.firstWords,1,'Vous pouvez choisir vos trois mots quand vous le souhaitez.')+
+ bilanCard('Mon intention de départ',a.initial,1,'Ce que vous souhaitez ressentir dans vos vêtements.')+
+ bilanCard('Une pièce dans laquelle je me reconnais',a.favorite,2,'Une pièce préférée, sa coupe ou ce qu’elle vous apporte.')+
+ '</div></section>'+
+ '<section class="bilan-section"><div class="bilan-section-heading"><span>02</span><div><h2>Mes couleurs et mes matières</h2><p>Des observations et préférences personnelles, sans diagnostic colorimétrique automatique.</p></div></div>'+
+ '<div class="bilan-card-grid">'+
+ bilanCard('Mes couleurs préférées et habituelles',a.colors,5,'Les couleurs que vous aimez et portez le plus souvent.')+
+ bilanCard('Le neutre que j’aime près du visage',a.neutral,6,'Une nuance testée près du visage, selon votre ressenti.')+
+ bilanCard('Les matières que j’apprécie',a.material,11,'Un tombé, un toucher ou un critère de confort à retenir.')+
+ '</div></section>'+
+ '<section class="bilan-section"><div class="bilan-section-heading"><span>03</span><div><h2>Ma signature de style</h2><p>Des choix que je peux reconnaître, exprimer et réutiliser.</p></div></div>'+
+ '<div class="bilan-card-grid">'+
+ bilanCard('Mes mots de style',a.style,8,'Les trois mots qui vous correspondent aujourd’hui.')+
+ bilanCard('Mes univers vestimentaires',a.universes,8,'Les inspirations qui vous attirent, même si elles sont différentes.')+
+ bilanCard('Les lignes et volumes que j’aime',a.lines,10,'Une proportion, une coupe ou une ligne visuelle observée.')+
+ bilanCard('Ma formule signature',a.signature,14,'Par exemple : une base simple, une veste structurée, un détail coloré.')+
+ '</div></section>'+
+ '<section class="bilan-section"><div class="bilan-section-heading"><span>04</span><div><h2>Mon dressing en action</h2><p>Les détails et associations qui rendent mon style facile à vivre.</p></div></div>'+
+ '<div class="bilan-card-grid">'+
+ bilanCard('Le détail qui transforme une tenue',a.details,13,'Sac, bijou, chaussure, coiffure ou touche de couleur.')+
+ bilanCard('Ce que j’aime mettre en valeur',a.highlights,15,'Ce que vous choisissez de révéler, à votre manière.')+
+ bilanCard('Mes pièces incontournables',a.capsule,19,'Les bases de votre mini-capsule personnelle.')+
+ bilanCard('Mes tenues de la semaine',a.weekly,20,'Trois associations utiles pour votre vraie vie.')+
+ '</div></section>'+
+ '<section class="bilan-section bilan-next"><div class="bilan-section-heading"><span>05</span><div><h2>Je continue à mon rythme</h2><p>Mon plan d’action pour les trente prochains jours.</p></div></div>'+
+ '<div class="bilan-card-grid">'+
+ bilanCard('Les progrès que je reconnais',a.progress,21,'Un petit changement concret est déjà un progrès.')+
+ bilanCard('Mon rituel pour les 30 prochains jours',a.habit,21,'Une habitude simple à répéter, à votre rythme.')+
+ (a.future?bilanCard('Un mot à moi-même dans un mois',a.future,21,''):'')+
+ '</div><div class="bilan-closing"><span aria-hidden="true">✦</span><p>Mon style n’est pas une liste de règles. C’est une manière de me reconnaître, d’exprimer ce que j’aime et d’habiller la personne que je suis aujourd’hui.</p></div></section>'+
+ '</div>'+
+ '<section class="bilan-export-panel"><div><h2>Je garde ma boussole style</h2><p>Votre document rassemble vos propres réponses. Vous pouvez le consulter dès maintenant, même si les 21 journées ne sont pas terminées. Il se met à jour au fil de votre parcours.</p>'+
+ (photos.length?'<label class="bilan-photo-consent"><input id="bilanPhotos" type="checkbox"><span>Ajouter jusqu’à 6 de mes photos personnelles dans le document imprimable</span></label>':'<p class="muted">Vous pourrez ajouter des photos à vos exercices si vous le souhaitez. Elles restent privées par défaut.</p>')+
+ '<p class="muted">Les photos ne sont incluses que si vous cochez cette option. Ce document ne contient aucun diagnostic automatique de morphologie ou de colorimétrie.</p></div>'+
+ '<div class="bilan-export-actions"><button class="btn pink" id="downloadBilan">Ouvrir mon bilan pour l’enregistrer en PDF ↗</button><p class="muted">Une page imprimable s’ouvrira. Choisissez « Imprimer », puis « Enregistrer au format PDF ».</p></div></section>'+
+ '<div class="community"><h2>Et si j’avais envie d’un regard professionnel personnalisé ?</h2><p>Ce bilan reflète vos découvertes personnelles. Un rendez-vous avec Adeline peut permettre d’aller plus loin grâce à une analyse individualisée, des essais guidés et des conseils adaptés à vos objectifs.</p><div class="actions"><button class="btn pink" data-nav="services">Découvrir les accompagnements</button><button class="btn outline" data-nav="services">Explorer le bilan d’image personnalisé</button></div></div>';
+}
+
 function servicesHTML(){
  const offerings=[
  ['Colorimétrie','Comprendre l’effet des nuances près du visage et explorer les harmonies qui vous ressemblent.','assets/couleurs-jardin-1.png',''],
