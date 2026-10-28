@@ -5,7 +5,8 @@ window.ALIGNER_CONFIG = {
   demoMode: false,
   appointmentUrl: 'https://alignerconseil.fr/',
   whatsappInviteUrl: '',
-  privacyUrl: '',
-  legalUrl: '',
-  termsUrl: ''
+  privacyUrl: 'https://adeline-couturaud.github.io/aligner-programme/confidentialite.html',
+  legalUrl: 'https://adeline-couturaud.github.io/aligner-programme/mentions-legales.html',
+  termsUrl: 'https://adeline-couturaud.github.io/aligner-programme/cgv.html',
+  checkoutEnabled: false
 };
