@@ -248,3 +248,19 @@ body.bilan-print-open{overflow:hidden}
 .audacity-step p{margin:0;line-height:1.8}
 .audacity-step .audacity-gentle{margin-top:14px;padding-top:12px;border-top:1px solid #efd9e1;font-size:.88rem;color:#664654}
 @media(max-width:600px){.audacity-step{padding:18px}.audacity-step h2{font-size:1.25rem}}
+
+/* Des repères visuels et des compléments à ouvrir selon ses besoins. */
+.teaching-illustration{margin:24px 0;border:1px solid var(--line);border-radius:16px;padding:12px;background:white}
+.teaching-illustration img{display:block;width:100%;height:auto}
+.teaching-illustration figcaption{font-size:.78rem;line-height:1.5;color:var(--muted);padding:12px 8px 3px}
+.day-result{background:#ebf5f2;border-radius:12px;padding:17px 20px;line-height:1.7}
+.optional-reflection,.technical-reference{margin:20px 0;border:1px solid var(--line);border-radius:12px;padding:14px 16px;background:#fafcfb}
+.optional-reflection summary,.technical-reference summary{cursor:pointer;font-weight:700;color:var(--green);line-height:1.5}
+.technical-reference p{line-height:1.75;margin:14px 0 0}
+.bio-facts{display:flex;gap:8px;flex-wrap:wrap}.bio-facts span{background:#edf4ef;padding:7px 10px;border-radius:8px;font-size:.75rem;color:var(--green)}
+.course-contract{margin:25px 0;padding:20px;background:#f4f7f4;border-radius:14px}.course-contract p{line-height:1.8;margin:0}
+.video-lesson{padding:20px;border:1px solid var(--line);border-radius:14px;margin:24px 0;background:white}.video-lesson p{font-size:.85rem;line-height:1.6}.video-lesson a{font-size:.8rem}.video-mount{margin:16px 0}.video-mount iframe{display:block;width:100%;min-height:200px;aspect-ratio:16/9;border:0}
+.illustration-window{overflow-x:auto;border-radius:10px}.illustration-window:focus-visible{outline:3px solid var(--teal);outline-offset:3px}.teaching-illustration>[data-enlarge-illustration]{margin:4px 4px 10px}.teaching-illustration.is-expanded img{min-width:760px}
+@media(max-width:600px){.teaching-illustration{margin:20px -5px;padding:4px}.optional-reflection,.technical-reference{padding:13px}.hello-adeline p{font-size:.9rem}}
+
+.audacity-step summary{cursor:pointer;font-weight:700;line-height:1.6}.audacity-step>p{margin-top:14px}
