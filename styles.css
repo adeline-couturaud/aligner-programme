@@ -241,3 +241,10 @@ body.bilan-print-open{overflow:hidden}
 .bilan-photo-frame{margin:0 0 18px;max-width:510px}
 .bilan-photo-frame[hidden]{display:none!important}
 .bilan-photo-frame img{display:block;width:100%;max-height:270px;object-fit:contain;object-position:center;border-radius:13px;background:#f0f5f1}
+
+/* Petits pas facultatifs : audace et affirmation de ses choix. */
+.audacity-step{margin:24px 0;padding:23px 25px;border:1px solid #efc5d3;border-left:5px solid var(--berry);border-radius:16px;background:#fff7fa;color:var(--green)}
+.audacity-step h2{margin:8px 0 12px;font-size:1.4rem;line-height:1.35}
+.audacity-step p{margin:0;line-height:1.8}
+.audacity-step .audacity-gentle{margin-top:14px;padding-top:12px;border-top:1px solid #efd9e1;font-size:.88rem;color:#664654}
+@media(max-width:600px){.audacity-step{padding:18px}.audacity-step h2{font-size:1.25rem}}
