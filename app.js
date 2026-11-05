@@ -168,7 +168,7 @@ function dayHTML(){
   '<div class="learning-title"><span class="learning-symbol" aria-hidden="true">✦</span><div><h2>Le repère utile</h2></div></div><p>'+esc(d.lesson||d.why)+'</p></section>';
  const example='<section class="day-example"><div class="example-head"><span class="example-symbol" aria-hidden="true">↗</span><h3>Un exemple concret</h3></div>'+
   '<p>'+esc(d.example||'')+'</p>'+
-  (picture&&!d.illustration?'<figure class="example-photo"><img loading="lazy" src="'+esc(picture[0])+'" alt="'+esc(picture[1])+'"><figcaption>Un aperçu de l’univers Aligner Conseil.</figcaption></figure>':'')+
+  (picture&&!d.illustration&&!d.teaching_photo?'<figure class="example-photo"><img loading="lazy" src="'+esc(picture[0])+'" alt="'+esc(picture[1])+'"><figcaption>Un aperçu de l’univers Aligner Conseil.</figcaption></figure>':'')+
   '</section>';
  const checklist= d.checklist?'<details class="optional-reflection" '+(Array.isArray(e.answers?.quick)&&e.answers.quick.length?'open':'')+'><summary>Affiner mon observation (facultatif)</summary><fieldset class="quick-reflection"><legend>'+esc(d.checklist.question)+'</legend>'+
   d.checklist.options.map((o,i)=>'<label class="quick-option"><input type="checkbox" data-quick-option="'+i+'" '+((Array.isArray(e.answers?.quick)?e.answers.quick:[]).includes(i)?'checked':'')+'><span>'+esc(o)+'</span></label>').join('')+'</fieldset></details>':'';
@@ -177,7 +177,7 @@ function dayHTML(){
  return '<div class="day-head"><span class="badge '+(d.phase==='Clarifier'?'rose':d.phase==='Agir'?'blue':'')+'">JOUR '+fmt(d.day)+' / 21 · '+esc(d.phase).toUpperCase()+'</span><span class="badge gold">'+esc(d.minutes)+' minutes</span></div>'+
  '<h1 class="day-title">'+esc(d.title)+'</h1><div class="stage-rule"></div>'+
  '<section class="day-intro"><h3 class="section-title">Votre objectif</h3><p>'+esc(d.why)+'</p></section>'+
-  learning+illustrationHTML(d)+dayVideoHTML(d)+example+
+  learning+teachingPhotoHTML(d)+illustrationHTML(d)+dayVideoHTML(d)+example+
  (d.visual?visualHTML(d.visual):'')+(d.reference?'<details class="technical-reference"><summary>'+esc(d.reference.title)+'</summary><p>'+esc(d.reference.text)+'</p></details>':'')+
  dayReferenceHTML(d)+
  '<section class="section card experience-card"><h3 class="section-title"><span aria-hidden="true">✓</span> L’expérience du jour</h3><ol class="task-list">'+d.steps.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ol>'+
@@ -197,6 +197,12 @@ function dayHTML(){
  '';
 }
 
+
+function teachingPhotoHTML(d){
+ const p=d.teaching_photo;
+ if(!p||typeof p.src!=='string'||p.src.length>800000||!/^data:image\/webp;base64,[A-Za-z0-9+/]+=*$/.test(p.src))return '';
+ return '<figure class="teaching-photo'+(p.portrait?' teaching-photo-portrait':'')+'"><img src="'+esc(p.src)+'" alt="'+esc(p.alt||'Exemple illustré')+'" loading="lazy" decoding="async" width="'+Number(p.width||1000)+'" height="'+Number(p.height||667)+'">'+(p.caption?'<figcaption>'+esc(p.caption)+'</figcaption>':'')+'</figure>';
+}
 
 function illustrationHTML(d){
  const item=d.illustration,svg=item?.svg;

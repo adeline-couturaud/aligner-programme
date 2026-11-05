@@ -264,3 +264,8 @@ body.bilan-print-open{overflow:hidden}
 @media(max-width:600px){.teaching-illustration{margin:20px -5px;padding:4px}.optional-reflection,.technical-reference{padding:13px}.hello-adeline p{font-size:.9rem}}
 
 .audacity-step summary{cursor:pointer;font-weight:700;line-height:1.6}.audacity-step>p{margin-top:14px}
+
+/* Photos pédagogiques : cadrage entier et fond pour les images détourées. */
+.teaching-photo{margin:24px 0;overflow:hidden;border:1px solid var(--line);border-radius:16px;background:#fffefd;break-inside:avoid}.teaching-photo img{display:block;width:100%;height:auto;max-height:520px;object-fit:contain}.teaching-photo-portrait img{max-height:380px}.teaching-photo figcaption{padding:14px 18px;font-size:.85rem;line-height:1.6;color:var(--green);border-top:1px solid var(--line)}
+@media(max-width:600px){.teaching-photo{margin:18px 0;border-radius:12px}.teaching-photo figcaption{padding:12px 14px}.teaching-photo-portrait img{max-height:300px}}
+@media print{.teaching-photo{max-width:100%;break-inside:avoid}.teaching-photo img{max-height:240px}}
