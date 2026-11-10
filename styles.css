@@ -288,3 +288,12 @@ body.bilan-print-open{overflow:hidden}
 .optional-reflection>summary::after,.technical-reference>summary::after,.lesson-details>summary::after,.audacity-step>summary::after,.palette-group>summary::after{content:'';position:absolute;right:6px;top:.35em;width:10px;height:10px;border-right:2px solid var(--berry);border-bottom:2px solid var(--berry);transform:rotate(45deg);transition:transform .18s}
 details[open].optional-reflection>summary::after,details[open].technical-reference>summary::after,details[open].lesson-details>summary::after,details[open].audacity-step>summary::after,details[open].palette-group>summary::after{transform:rotate(225deg);top:.6em}
 @media(max-width:640px){.starting-observation{padding:16px}.starting-photo-media{max-width:360px}.starting-photo-title{font-size:clamp(17px,5vw,22px)}}
+
+/* Les compléments ont une commande d’ouverture explicite. */
+summary.disclosure-trigger{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px!important;background:#fceef3;border:1px solid #ecc4d1;border-radius:10px;min-height:48px;cursor:pointer}
+summary.disclosure-trigger::after{display:none!important}
+.disclosure-title{flex:1 1 190px;min-width:0;line-height:1.5}
+.disclosure-action{display:inline-block;flex:0 0 auto;padding:7px 12px;border-radius:8px;background:#fff;color:#922c4d;font-size:.9rem;font-weight:700;border:1px solid #e2aabb}
+summary.disclosure-trigger:focus-visible{outline:3px solid var(--teal);outline-offset:3px}
+details[open]>summary.disclosure-trigger{margin-bottom:16px;background:#f3f7f4;border-color:var(--line)}
+@media(max-width:640px){summary.disclosure-trigger{padding:12px!important}.disclosure-action{font-size:15px}.disclosure-title{flex-basis:160px}}
