@@ -4,16 +4,33 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0B493F">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Carnet Aligné">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/carnet-apple-touch.png">
   <meta name="description" content="Mon Carnet Aligné : 21 jours pour explorer votre style, oser à votre mesure et affirmer vos choix. Audace, confiance et image de soi avec Aligner Conseil.">
   <title>Mon carnet Aligné · Aligner Conseil</title>
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="styles.css?v=20261112-mobile-1">
+  <link rel="stylesheet" href="styles.css?v=20261112-pwa-1">
   <script defer src="config.js"></script>
-  <script defer src="app.js?v=20261112-mobile-1"></script>
+  <script defer src="app.js?v=20261112-pwa-1"></script>
+  <script defer src="pwa.js?v=20261112-pwa-1"></script>
   <script defer src="privacy-controls.js?v=20261013-delete-1"></script>
 </head>
 <body>
   <div id="app" aria-live="polite"></div>
+  <section id="carnet-install-access" class="install-carnet-access" hidden><button type="button" class="btn outline" data-install-carnet>Installer le carnet sur mon appareil</button></section>
+  <dialog id="carnet-install-dialog" class="install-carnet-dialog" aria-labelledby="install-carnet-title">
+    <h2 id="install-carnet-title">Mon carnet sur mon téléphone</h2>
+    <p>Retrouvez votre carnet depuis une icône sur l’écran d’accueil.</p>
+    <ol data-install-ios hidden><li>Ouvrez ce carnet dans <strong>Safari</strong>.</li><li>Ouvrez le menu <strong>Partager</strong>, puis choisissez <strong>Sur l’écran d’accueil</strong> ou <strong>Ajouter à l’écran d’accueil</strong>.</li><li>Si l’option est proposée, gardez <strong>Ouvrir comme app web</strong> activé, puis touchez <strong>Ajouter</strong>.</li></ol>
+    <div data-install-other hidden><p><strong>Sur Android :</strong> ouvrez le menu du navigateur (⋮), puis choisissez <strong>Installer l’application</strong> ou <strong>Ajouter à l’écran d’accueil</strong>.</p><p><strong>Sur ordinateur :</strong> recherchez l’option d’installation dans la barre d’adresse ou le menu du navigateur. Si elle n’est pas proposée, le carnet reste accessible depuis ce lien.</p></div>
+    <p class="install-carnet-note">Une connexion Internet reste nécessaire pour les exercices et l’enregistrement. À la première ouverture depuis l’icône, reconnectez-vous avec votre compte habituel si cela vous est demandé.</p>
+    <form method="dialog"><button type="submit" class="btn" data-close-install>J’ai compris</button></form>
+  </dialog>
   <footer style="text-align:center;padding:20px 12px;font:14px system-ui,sans-serif;color:#28584e"><a href="mentions-legales.html">Mentions légales</a> · <a href="cgv.html">Conditions générales de vente</a> · <a href="confidentialite.html">Confidentialité</a> · <a href="retractation.html">Renoncer au contrat ici</a> · <a href="https://www.cm2c.net/declarer-un-litige.php">Médiation CM2C</a></footer>
 </body>
 </html>
+
