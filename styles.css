@@ -273,7 +273,7 @@ body.bilan-print-open{overflow:hidden}
 /* Parcours court et lecture tactile. */
 .day-goal{line-height:1.5;margin:12px 0}.first-tip{margin:16px 0}.first-tip p{margin:8px 0 0}.lesson-details{margin:16px 0;border:1px solid var(--line);padding:14px;border-radius:12px}.lesson-details>summary{cursor:pointer;font-weight:700;line-height:1.5;min-height:32px}.lesson-details[open]>summary{margin-bottom:16px}
 @media screen and (max-width:640px){
-.main,.card,.formbox,.guided-card,.situation-card,.layout{min-width:0;max-width:100%;box-sizing:border-box}.main{padding:16px 12px 28px}.day-title{font-size:1.6rem;line-height:1.2}.day-head{flex-wrap:wrap;gap:8px}.stage-rule{margin:12px 0}.experience-card{padding:16px!important;margin-top:16px}.task-list{padding-left:22px}.task-list li{line-height:1.55;margin-bottom:10px}.first-tip{padding:16px}.first-tip p{line-height:1.55}.lesson-details .teaching-photo img{max-height:230px}.lesson-details .teaching-photo-portrait img{max-height:220px}.field input,.field textarea,.field select,input[type=email],input[type=password]{font-size:16px;max-width:100%;box-sizing:border-box}.guided-grid,.situation-grid,.three-words-grid{grid-template-columns:1fr}.actions{gap:10px;flex-wrap:wrap}.actions .btn{min-height:44px;white-space:normal;flex:1 1 150px}.mobile-nav{display:flex;gap:6px;overflow-x:auto;max-width:100%;padding-bottom:8px}.mobile-nav button{min-height:44px;flex:0 0 auto}.quick-option{min-height:44px;align-items:flex-start}.quick-option input{min-width:20px;min-height:20px}.switch-row{align-items:flex-start}.switch-row>div{min-width:0}.day-goal,.coach-tip,.field label,.bilan-item{overflow-wrap:anywhere}input[type=file]{width:100%;min-width:0}.lesson-details .teaching-illustration{margin-left:0;margin-right:0}
+.main,.card,.formbox,.guided-card,.situation-card,.layout{min-width:0;max-width:100%;box-sizing:border-box}.main{padding:0}.day-title{font-size:1.6rem;line-height:1.2}.day-head{flex-wrap:wrap;gap:8px}.stage-rule{margin:12px 0}.experience-card{padding:16px!important;margin-top:16px}.task-list{padding-left:0}.task-list li{line-height:1.55;margin-bottom:10px}.first-tip{padding:16px}.first-tip p{line-height:1.55}.lesson-details .teaching-photo img{max-height:230px}.lesson-details .teaching-photo-portrait img{max-height:220px}.field input,.field textarea,.field select,input[type=email],input[type=password]{font-size:16px;max-width:100%;box-sizing:border-box}.guided-grid,.situation-grid,.three-words-grid{grid-template-columns:1fr}.actions{gap:10px;flex-wrap:wrap}.actions .btn{min-height:44px;white-space:normal;flex:1 1 150px}.mobile-nav{display:flex;gap:6px;overflow-x:auto;max-width:100%;padding-bottom:8px}.mobile-nav button{min-height:44px;flex:0 0 auto}.quick-option{min-height:44px;align-items:flex-start}.quick-option input{min-width:20px;min-height:20px}.switch-row{align-items:flex-start}.switch-row>div{min-width:0}.day-goal,.coach-tip,.field label,.bilan-item{overflow-wrap:anywhere}input[type=file]{width:100%;min-width:0}.lesson-details .teaching-illustration{margin-left:0;margin-right:0}
 }
 @media print{.lesson-details{display:block}.lesson-details>summary{display:none}}
 
@@ -297,3 +297,31 @@ summary.disclosure-trigger::after{display:none!important}
 summary.disclosure-trigger:focus-visible{outline:3px solid var(--teal);outline-offset:3px}
 details[open]>summary.disclosure-trigger{margin-bottom:16px;background:#f3f7f4;border-color:var(--line)}
 @media(max-width:640px){summary.disclosure-trigger{padding:12px!important}.disclosure-action{font-size:15px}.disclosure-title{flex-basis:160px}}
+
+/* Lecture confortable de la fiche récapitulative. */
+.tips-sheet .bilan-item + .bilan-item{margin-top:12px}
+.tips-sheet .bilan-item h4{margin:0;font-size:1rem;line-height:1.5;color:var(--green)}
+.tips-sheet .bilan-item p{margin-bottom:0}
+@media screen and (max-width:640px){
+ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+ .content{padding:22px 16px 40px}
+ .topbar{flex-wrap:wrap;gap:10px}
+ .topbar .right{min-width:0;flex-wrap:wrap}
+ .topbar .micro{line-height:1.5}
+ .btn,.btn.small,.text-button,.bilan-edit{min-height:44px}
+ .btn,.btn.small{font-size:15px;line-height:1.4;white-space:normal;max-width:100%}
+ .text-button,.bilan-edit{display:inline-flex;align-items:center}
+ .field label,.quick-option,.switch-row label{font-size:1rem;line-height:1.55}
+ .field textarea{min-height:120px}
+ .field input:not([type=checkbox]):not([type=radio]),.field select{min-height:48px}
+ .field textarea,.field input,.field select{scroll-margin-block:24px}
+ .quick-option{padding-block:12px}
+ .mobile-nav{gap:8px;overflow-x:visible}
+ .mobile-nav button{font-size:14px;padding:10px 12px}
+ .day-title,.section-title,.disclosure-title,.bilan-item-heading h4{overflow-wrap:anywhere}
+ .bilan-item-heading{align-items:flex-start;flex-wrap:wrap;gap:6px}
+ .bilan-item-heading h3,.bilan-item-heading h4{flex:1 1 160px}
+ .bilan-export-panel .btn{width:100%}
+ .bilan-print-actions .btn{min-width:0;flex:1 1 130px}
+ .toast{left:16px;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));max-width:none;overflow-wrap:anywhere}
+}
