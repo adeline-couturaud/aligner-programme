@@ -36,7 +36,8 @@ Deno.serve(async (req: Request) => {
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
   const stripeKey = Deno.env.get("STRIPE_SECRET_KEY") || "";
   const signingSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET") || "";
-  const priceId = Deno.env.get("STRIPE_PRICE_ID") || "";
+  // Tarif fourni pour cet environnement de test, sans paiement réel.
+  const priceId = "price_1UbMDDHqesE01MFcG9G1sX70";
   const sbUrl = Deno.env.get("SUPABASE_URL") || "";
   const sbKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
   if (!stripeKey.startsWith("sk_test_") || !signingSecret.startsWith("whsec_") ||

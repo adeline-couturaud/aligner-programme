@@ -20,7 +20,8 @@ Deno.serve(async (req: Request) => {
   if (req.headers.get("origin") !== ALLOWED_ORIGIN) return json({ error: "Origine non autorisée." }, 403);
 
   const stripeKey = Deno.env.get("STRIPE_SECRET_KEY") || "";
-  const priceId = Deno.env.get("STRIPE_PRICE_ID") || "";
+  // Tarif fourni pour cet environnement de test, sans paiement réel.
+  const priceId = "price_1UbMDDHqesE01MFcG9G1sX70";
   const sbUrl = Deno.env.get("SUPABASE_URL") || "";
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
   // Test-only rollout: live keys are deliberately rejected until legal and billing review.
