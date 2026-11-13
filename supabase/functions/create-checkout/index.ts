@@ -42,12 +42,20 @@ Deno.serve(async (req: Request) => {
       return json({ error: "Session expirée, reconnectez-vous." }, 401);
     }
     const user = auth.user;
+    const body = await req.json().catch(() => ({}));
+    const adminTest = body?.testOnly === true;
+    if (adminTest) {
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles").select("role").eq("id", user.id).single();
+      if (profileError || profile?.role !== "admin") {
+        return json({ error: "Test réservé au compte administratrice." }, 403);
+      }
+    }
     const { data: membership, error: membershipError } = await supabase
       .from("enrollments").select("status").eq("user_id", user.id).maybeSingle();
     if (membershipError) throw membershipError;
-    if (membership?.status === "active") return json({ already_active: true });
+    if (membership?.status === "active" && !adminTest) return json({ already_active: true });
 
-    const body = await req.json().catch(() => ({}));
     if (body?.termsAccepted !== true || body?.immediateAccess !== true || body?.rightsAcknowledged !== true) {
       return json({ error: "Les confirmations sont nécessaires avant de continuer." }, 400);
     }
@@ -115,10 +123,11 @@ Deno.serve(async (req: Request) => {
       console.error("Consent recording", consentError.code);
       return json({ error: "Impossible d'enregistrer les confirmations d'achat." }, 500);
     }
-    return json({ url: session.url });
+    return json({ url: session.url, test_only: true });
   } catch (error) {
     console.error("Create checkout", error instanceof Error ? error.message : "unknown");
     return json({ error: "Le paiement test est temporairement indisponible." }, 500);
   }
 });
+
 
