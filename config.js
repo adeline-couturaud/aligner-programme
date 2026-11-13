@@ -8,5 +8,8 @@ window.ALIGNER_CONFIG = {
   privacyUrl: 'https://adeline-couturaud.github.io/aligner-programme/confidentialite.html',
   legalUrl: 'https://adeline-couturaud.github.io/aligner-programme/mentions-legales.html',
   termsUrl: 'https://adeline-couturaud.github.io/aligner-programme/cgv.html',
+  launchPriceEuros: 37,
+  futurePriceEuros: 87,
   checkoutEnabled: false
 };
+
