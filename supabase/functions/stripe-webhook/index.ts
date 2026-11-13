@@ -1,6 +1,8 @@
 
 import { createClient } from "npm:@supabase/supabase-js@2";
 
+const LAUNCH_AMOUNT_CENTS = 3700;
+
 const json = (message: unknown, status = 200) =>
   new Response(JSON.stringify(message), {
     status,
@@ -69,13 +71,15 @@ Deno.serve(async (req: Request) => {
     const session = await stripeRes.json();
     if (!stripeRes.ok) throw new Error("Stripe session lookup failed: " + stripeRes.status);
     if (session.id !== obj.id || session.livemode !== false || session.mode !== "payment" ||
-        session.payment_status !== "paid" || session.amount_total !== 2700 ||
+        session.payment_status !== "paid" || session.amount_total !== LAUNCH_AMOUNT_CENTS ||
         session.currency !== "eur" || session.status !== "complete") {
       return json({ received: true, status: "not_applicable" });
     }
     const items = session.line_items?.data;
     if (!Array.isArray(items) || items.length !== 1 ||
         items[0]?.price?.id !== priceId || items[0]?.quantity !== 1 ||
+        items[0]?.price?.unit_amount !== LAUNCH_AMOUNT_CENTS ||
+        items[0]?.price?.currency !== "eur" || items[0]?.price?.livemode !== false ||
         session.line_items?.has_more === true) {
       return json({ error: "Unexpected checkout price" }, 400);
     }
@@ -114,7 +118,7 @@ Deno.serve(async (req: Request) => {
       stripe_checkout_session_id: session.id,
       stripe_payment_intent_id: typeof session.payment_intent === "string" ? session.payment_intent : null,
       stripe_price_id: priceId,
-      total_cents: 2700,
+      total_cents: LAUNCH_AMOUNT_CENTS,
       currency: "eur",
       status: "paid",
       updated_at: now,
@@ -136,3 +140,4 @@ Deno.serve(async (req: Request) => {
     return json({ error: "Webhook processing failed" }, 500);
   }
 });
+

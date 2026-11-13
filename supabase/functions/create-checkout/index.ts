@@ -3,7 +3,8 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 
 const ALLOWED_ORIGIN = "https://adeline-couturaud.github.io";
 const APP_URL = "https://adeline-couturaud.github.io/aligner-programme/";
-const TERMS_VERSION = "2026-10-28-droit-retractation";
+const TERMS_VERSION = "2026-11-13-lancement-37";
+const LAUNCH_AMOUNT_CENTS = 3700;
 const cors = {
   "Access-Control-Allow-Origin": ALLOWED_ORIGIN,
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -50,6 +51,19 @@ Deno.serve(async (req: Request) => {
       return json({ error: "Les confirmations sont nécessaires avant de continuer." }, 400);
     }
 
+    // Refuse an old or recurring Stripe price before creating any payment.
+    const priceRes = await fetch("https://api.stripe.com/v1/prices/" + encodeURIComponent(priceId), {
+      headers: { authorization: "Bearer " + stripeKey },
+    });
+    const price = await priceRes.json();
+    if (!priceRes.ok || price.id !== priceId || price.livemode !== false ||
+        price.active !== true || price.currency !== "eur" ||
+        price.type !== "one_time" || price.billing_scheme !== "per_unit" ||
+        price.unit_amount !== LAUNCH_AMOUNT_CENTS || price.custom_unit_amount ||
+        price.transform_quantity) {
+      return json({ error: "Le tarif de lancement à 37 € doit être configuré dans Stripe avant le test." }, 503);
+    }
+
     const now = new Date().toISOString();
     const values = new URLSearchParams();
     values.set("mode", "payment");
@@ -81,7 +95,9 @@ Deno.serve(async (req: Request) => {
       console.error("Stripe Checkout", res.status, session?.error?.code || "error");
       return json({ error: "Impossible de préparer le paiement test. Vérifiez le tarif Stripe." }, 502);
     }
-    if (typeof session.id !== "string" || typeof session.url !== "string" ||
+    if (typeof session.id !== "string" || !session.id.startsWith("cs_test_") ||
+        session.livemode !== false || session.amount_total !== LAUNCH_AMOUNT_CENTS ||
+        session.currency !== "eur" || typeof session.url !== "string" ||
         !session.url.startsWith("https://checkout.stripe.com/")) {
       return json({ error: "Réponse Stripe invalide." }, 502);
     }
@@ -104,3 +120,4 @@ Deno.serve(async (req: Request) => {
     return json({ error: "Le paiement test est temporairement indisponible." }, 500);
   }
 });
+
