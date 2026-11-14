@@ -2,6 +2,8 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 const LAUNCH_AMOUNT_CENTS = 3700;
+// À changer uniquement lors de l’ouverture explicitement validée des ventes.
+const LIVE_RELEASE_APPROVED = false;
 
 const json = (message: unknown, status = 200) =>
   new Response(JSON.stringify(message), {
@@ -34,31 +36,34 @@ async function verifyStripeSignature(raw: string, signatureHeader: string, secre
 
 Deno.serve(async (req: Request) => {
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
-  const stripeKey = Deno.env.get("STRIPE_SECRET_KEY") || "";
-  const signingSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET") || "";
-  // Tarif fourni pour cet environnement de test, sans paiement réel.
-  const priceId = "price_1UbMDDHqesE01MFcG9G1sX70";
+  const payload = await req.text();
+  let event;
+  try { event = JSON.parse(payload); } catch { return json({ error: "Invalid event" }, 400); }
+  if (typeof event?.livemode !== "boolean") return json({ error: "Invalid event mode" }, 400);
+  const isLive = event.livemode;
+  if (isLive && (!LIVE_RELEASE_APPROVED || Deno.env.get("CARNET_LIVE_SALES_ENABLED") !== "true")) {
+    return json({ error: "Live payments are not enabled" }, 503);
+  }
+  const stripeKey = Deno.env.get(isLive ? "STRIPE_LIVE_SECRET_KEY" : "STRIPE_SECRET_KEY") || "";
+  const signingSecret = Deno.env.get(isLive ? "STRIPE_LIVE_WEBHOOK_SECRET" : "STRIPE_WEBHOOK_SECRET") || "";
+  const priceId = isLive ? (Deno.env.get("STRIPE_LIVE_PRICE_ID") || "") : "price_1UbMDDHqesE01MFcG9G1sX70";
   const sbUrl = Deno.env.get("SUPABASE_URL") || "";
   const sbKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
-  if (!stripeKey.startsWith("sk_test_") || !signingSecret.startsWith("whsec_") ||
+  if (!stripeKey.startsWith(isLive ? "sk_live_" : "sk_test_") || !signingSecret.startsWith("whsec_") ||
       !priceId.startsWith("price_") || !sbUrl || !sbKey) {
-    return json({ error: "Test webhook not configured" }, 503);
+    return json({ error: "Webhook not configured" }, 503);
   }
-
-  const payload = await req.text();
   const sig = req.headers.get("stripe-signature") || "";
   if (!await verifyStripeSignature(payload, sig, signingSecret)) {
     return json({ error: "Invalid Stripe signature" }, 400);
   }
 
   try {
-    const event = JSON.parse(payload);
-    if (event.livemode !== false) return json({ error: "Live events are disabled" }, 400);
     if (event.type !== "checkout.session.completed" && event.type !== "checkout.session.async_payment_succeeded") {
       return json({ received: true });
     }
     const obj = event?.data?.object;
-    if (typeof obj?.id !== "string" || !obj.id.startsWith("cs_test_")) {
+    if (typeof obj?.id !== "string" || !obj.id.startsWith(isLive ? "cs_live_" : "cs_test_")) {
       return json({ error: "Unexpected checkout session" }, 400);
     }
 
@@ -71,7 +76,7 @@ Deno.serve(async (req: Request) => {
     );
     const session = await stripeRes.json();
     if (!stripeRes.ok) throw new Error("Stripe session lookup failed: " + stripeRes.status);
-    if (session.id !== obj.id || session.livemode !== false || session.mode !== "payment" ||
+    if (session.id !== obj.id || session.livemode !== isLive || session.mode !== "payment" ||
         session.payment_status !== "paid" || session.amount_total !== LAUNCH_AMOUNT_CENTS ||
         session.currency !== "eur" || session.status !== "complete") {
       return json({ received: true, status: "not_applicable" });
@@ -80,7 +85,7 @@ Deno.serve(async (req: Request) => {
     if (!Array.isArray(items) || items.length !== 1 ||
         items[0]?.price?.id !== priceId || items[0]?.quantity !== 1 ||
         items[0]?.price?.unit_amount !== LAUNCH_AMOUNT_CENTS ||
-        items[0]?.price?.currency !== "eur" || items[0]?.price?.livemode !== false ||
+        items[0]?.price?.currency !== "eur" || items[0]?.price?.livemode !== isLive ||
         session.line_items?.has_more === true) {
       return json({ error: "Unexpected checkout price" }, 400);
     }
@@ -105,40 +110,27 @@ Deno.serve(async (req: Request) => {
       throw new Error("Missing verified checkout consents");
     }
 
-    // Isolate Stripe test payments from real client access.
-    // A test Checkout Session must never activate a production enrollment.
-    console.info("Verified Stripe TEST payment; enrollment remains unchanged", {
-      stripe_checkout_session_id: session.id,
-      user_id: userId,
-    });
-    return json({ received: true, test_only: true, enrollment_unchanged: true });
-
-    const now = new Date().toISOString();
-    const { error: orderError } = await supabase.from("payment_orders").upsert({
-      user_id: userId,
-      stripe_checkout_session_id: session.id,
-      stripe_payment_intent_id: typeof session.payment_intent === "string" ? session.payment_intent : null,
-      stripe_price_id: priceId,
-      total_cents: LAUNCH_AMOUNT_CENTS,
-      currency: "eur",
-      status: "paid",
-      updated_at: now,
-    }, { onConflict: "stripe_checkout_session_id" });
-    if (orderError) throw orderError;
-
-    const { data: active, error: membershipError } = await supabase
-      .from("enrollments").select("status,purchased_at").eq("user_id", userId).maybeSingle();
-    if (membershipError) throw membershipError;
-    if (active?.status !== "active") {
-      const { error: grantError } = await supabase.from("enrollments").upsert({
-        user_id: userId, status: "active", purchased_at: now,
-      }, { onConflict: "user_id" });
-      if (grantError) throw grantError;
+    if (!isLive) {
+      // Un paiement de test ne doit jamais activer un accès cliente.
+      console.info("Verified Stripe TEST payment; enrollment remains unchanged");
+      return json({ received: true, test_only: true, enrollment_unchanged: true });
     }
-    return json({ received: true });
+
+    const { data: activation, error: activationError } = await supabase.rpc("activate_paid_enrollment", {
+      p_user_id: userId,
+      p_session_id: session.id,
+      p_payment_intent_id: typeof session.payment_intent === "string" ? session.payment_intent : null,
+      p_price_id: priceId,
+      p_total_cents: LAUNCH_AMOUNT_CENTS,
+      p_currency: "eur",
+    });
+    if (activationError) throw activationError;
+    console.info("Verified Stripe LIVE payment; enrollment processed");
+    return json({ received: true, duplicate: activation?.duplicate === true });
   } catch (e) {
     console.error("Stripe webhook:", e instanceof Error ? e.message : "unknown");
     return json({ error: "Webhook processing failed" }, 500);
   }
 });
+
 

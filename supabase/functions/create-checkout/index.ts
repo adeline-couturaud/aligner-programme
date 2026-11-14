@@ -5,6 +5,8 @@ const ALLOWED_ORIGIN = "https://adeline-couturaud.github.io";
 const APP_URL = "https://adeline-couturaud.github.io/aligner-programme/";
 const TERMS_VERSION = "2026-11-13-lancement-37";
 const LAUNCH_AMOUNT_CENTS = 3700;
+// À changer uniquement lors de l’ouverture explicitement validée des ventes.
+const LIVE_RELEASE_APPROVED = false;
 const cors = {
   "Access-Control-Allow-Origin": ALLOWED_ORIGIN,
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -19,15 +21,9 @@ Deno.serve(async (req: Request) => {
   if (req.method !== "POST") return json({ error: "Méthode non autorisée." }, 405);
   if (req.headers.get("origin") !== ALLOWED_ORIGIN) return json({ error: "Origine non autorisée." }, 403);
 
-  const stripeKey = Deno.env.get("STRIPE_SECRET_KEY") || "";
-  // Tarif fourni pour cet environnement de test, sans paiement réel.
-  const priceId = "price_1UbMDDHqesE01MFcG9G1sX70";
   const sbUrl = Deno.env.get("SUPABASE_URL") || "";
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
-  // Test-only rollout: live keys are deliberately rejected until legal and billing review.
-  if (!stripeKey.startsWith("sk_test_") || !priceId.startsWith("price_") || !sbUrl || !serviceKey) {
-    return json({ error: "Paiement test non configuré." }, 503);
-  }
+  if (!sbUrl || !serviceKey) return json({ error: "Service de paiement non configuré." }, 503);
 
   const bearer = req.headers.get("authorization") || "";
   const accessToken = bearer.match(/^Bearer\s+(.+)$/i)?.[1] || "";
@@ -51,6 +47,15 @@ Deno.serve(async (req: Request) => {
         return json({ error: "Test réservé au compte administratrice." }, 403);
       }
     }
+    const isLive = !adminTest;
+    if (isLive && (!LIVE_RELEASE_APPROVED || Deno.env.get("CARNET_LIVE_SALES_ENABLED") !== "true")) {
+      return json({ error: "Les ventes ne sont pas encore ouvertes." }, 503);
+    }
+    const stripeKey = Deno.env.get(isLive ? "STRIPE_LIVE_SECRET_KEY" : "STRIPE_SECRET_KEY") || "";
+    const priceId = isLive ? (Deno.env.get("STRIPE_LIVE_PRICE_ID") || "") : "price_1UbMDDHqesE01MFcG9G1sX70";
+    if (!stripeKey.startsWith(isLive ? "sk_live_" : "sk_test_") || !priceId.startsWith("price_")) {
+      return json({ error: isLive ? "Paiement temporairement indisponible." : "Paiement test non configuré." }, 503);
+    }
     const { data: membership, error: membershipError } = await supabase
       .from("enrollments").select("status").eq("user_id", user.id).maybeSingle();
     if (membershipError) throw membershipError;
@@ -65,12 +70,12 @@ Deno.serve(async (req: Request) => {
       headers: { authorization: "Bearer " + stripeKey },
     });
     const price = await priceRes.json();
-    if (!priceRes.ok || price.id !== priceId || price.livemode !== false ||
+    if (!priceRes.ok || price.id !== priceId || price.livemode !== isLive ||
         price.active !== true || price.currency !== "eur" ||
         price.type !== "one_time" || price.billing_scheme !== "per_unit" ||
         price.unit_amount !== LAUNCH_AMOUNT_CENTS || price.custom_unit_amount ||
         price.transform_quantity) {
-      return json({ error: "Le tarif de lancement à 37 € doit être configuré dans Stripe avant le test." }, 503);
+      return json({ error: "Le tarif de lancement à 37 € doit être configuré dans le bon environnement Stripe." }, 503);
     }
 
     const now = new Date().toISOString();
@@ -83,6 +88,7 @@ Deno.serve(async (req: Request) => {
     values.set("client_reference_id", user.id);
     values.set("metadata[user_id]", user.id);
     values.set("metadata[product_code]", "mon-carnet-aligne-dressing");
+    values.set("metadata[payment_mode]", isLive ? "live" : "test");
     values.set("metadata[terms_version]", TERMS_VERSION);
     values.set("metadata[consented_at]", now);
     values.set("metadata[withdrawal_information_acknowledged]", "true");
@@ -102,10 +108,10 @@ Deno.serve(async (req: Request) => {
     const session = await res.json();
     if (!res.ok) {
       console.error("Stripe Checkout", res.status, session?.error?.code || "error");
-      return json({ error: "Impossible de préparer le paiement test. Vérifiez le tarif Stripe." }, 502);
+      return json({ error: "Impossible de préparer le paiement. Vérifiez le tarif Stripe." }, 502);
     }
-    if (typeof session.id !== "string" || !session.id.startsWith("cs_test_") ||
-        session.livemode !== false || session.amount_total !== LAUNCH_AMOUNT_CENTS ||
+    if (typeof session.id !== "string" || !session.id.startsWith(isLive ? "cs_live_" : "cs_test_") ||
+        session.livemode !== isLive || session.amount_total !== LAUNCH_AMOUNT_CENTS ||
         session.currency !== "eur" || typeof session.url !== "string" ||
         !session.url.startsWith("https://checkout.stripe.com/")) {
       return json({ error: "Réponse Stripe invalide." }, 502);
@@ -123,11 +129,12 @@ Deno.serve(async (req: Request) => {
       console.error("Consent recording", consentError.code);
       return json({ error: "Impossible d'enregistrer les confirmations d'achat." }, 500);
     }
-    return json({ url: session.url, test_only: true });
+    return json({ url: session.url, test_only: !isLive });
   } catch (error) {
     console.error("Create checkout", error instanceof Error ? error.message : "unknown");
-    return json({ error: "Le paiement test est temporairement indisponible." }, 500);
+    return json({ error: "Le paiement est temporairement indisponible." }, 500);
   }
 });
+
 
 
