@@ -49,7 +49,7 @@ Deno.serve(async (req: Request) => {
   const priceId = isLive ? (Deno.env.get("STRIPE_LIVE_PRICE_ID") || "") : "price_1UbMDDHqesE01MFcG9G1sX70";
   const sbUrl = Deno.env.get("SUPABASE_URL") || "";
   const sbKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
-  if (!stripeKey.startsWith(isLive ? "sk_live_" : "sk_test_") || !signingSecret.startsWith("whsec_") ||
+  if (!(isLive ? /^(?:sk|rk)_live_/.test(stripeKey) : stripeKey.startsWith("sk_test_")) || !signingSecret.startsWith("whsec_") ||
       !priceId.startsWith("price_") || !sbUrl || !sbKey) {
     return json({ error: "Webhook not configured" }, 503);
   }

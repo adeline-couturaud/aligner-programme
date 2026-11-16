@@ -53,7 +53,7 @@ Deno.serve(async (req: Request) => {
     }
     const stripeKey = Deno.env.get(isLive ? "STRIPE_LIVE_SECRET_KEY" : "STRIPE_SECRET_KEY") || "";
     const priceId = isLive ? (Deno.env.get("STRIPE_LIVE_PRICE_ID") || "") : "price_1UbMDDHqesE01MFcG9G1sX70";
-    if (!stripeKey.startsWith(isLive ? "sk_live_" : "sk_test_") || !priceId.startsWith("price_")) {
+    if (!(isLive ? /^(?:sk|rk)_live_/.test(stripeKey) : stripeKey.startsWith("sk_test_")) || !priceId.startsWith("price_")) {
       return json({ error: isLive ? "Paiement temporairement indisponible." : "Paiement test non configuré." }, 503);
     }
     const { data: membership, error: membershipError } = await supabase
