@@ -16,6 +16,49 @@ const cors = {
 const json = (data: unknown, status = 200) =>
   new Response(JSON.stringify(data), { status, headers: cors });
 
+
+async function checkLiveConfiguration() {
+  const stripeKey = Deno.env.get("STRIPE_LIVE_SECRET_KEY") || "";
+  const priceId = Deno.env.get("STRIPE_LIVE_PRICE_ID") || "";
+  const webhookSecret = Deno.env.get("STRIPE_LIVE_WEBHOOK_SECRET") || "";
+  const checks = {
+    api_key_configured: /^(?:sk|rk)_live_/.test(stripeKey),
+    price_id_configured: priceId === "price_1UboqaHM3OSYChuPVS1O1BQT",
+    webhook_secret_configured: webhookSecret.startsWith("whsec_"),
+    stripe_price_verified: false,
+  };
+  if (!checks.api_key_configured || !checks.price_id_configured || !checks.webhook_secret_configured) {
+    return json({ ok: false, checks, message: "Configuration incomplète : vérifiez les trois secrets de production." });
+  }
+  try {
+    // Lecture seule : aucune session de paiement, commande ou activation.
+    const res = await fetch("https://api.stripe.com/v1/prices/" + encodeURIComponent(priceId), {
+      headers: { authorization: "Bearer " + stripeKey },
+      signal: AbortSignal.timeout(10000),
+    });
+    if (!res.ok) {
+      const message = res.status === 401 ? "Stripe refuse la clé de production."
+        : res.status === 403 ? "La clé Stripe doit autoriser Prices en lecture."
+        : res.status === 404 ? "Le tarif est introuvable sur le compte Stripe associé à cette clé."
+        : "Stripe est temporairement indisponible. Réessayez.";
+      return json({ ok: false, checks, message });
+    }
+    const price = await res.json();
+    checks.stripe_price_verified = price.id === priceId && price.livemode === true &&
+      price.active === true && price.currency === "eur" && price.unit_amount === LAUNCH_AMOUNT_CENTS &&
+      price.type === "one_time" && price.billing_scheme === "per_unit" &&
+      !price.custom_unit_amount && !price.transform_quantity;
+    return json({
+      ok: checks.stripe_price_verified, checks,
+      message: checks.stripe_price_verified
+        ? "Tarif Stripe réel vérifié : 37 €, EUR, paiement unique. Secret de signature présent ; réception du webhook et ouverture de l'accès encore à tester. Aucun prélèvement effectué."
+        : "Le tarif doit être actif, en production, à 37 €, en EUR et en paiement unique.",
+    });
+  } catch {
+    return json({ ok: false, checks, message: "Vérification Stripe impossible pour le moment. Aucun paiement lancé." });
+  }
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
   if (req.method !== "POST") return json({ error: "Méthode non autorisée." }, 405);
@@ -40,13 +83,15 @@ Deno.serve(async (req: Request) => {
     const user = auth.user;
     const body = await req.json().catch(() => ({}));
     const adminTest = body?.testOnly === true;
-    if (adminTest) {
+    const adminReadiness = body?.checkLiveConfiguration === true;
+    if (adminTest || adminReadiness) {
       const { data: profile, error: profileError } = await supabase
         .from("profiles").select("role").eq("id", user.id).single();
       if (profileError || profile?.role !== "admin") {
         return json({ error: "Test réservé au compte administratrice." }, 403);
       }
     }
+    if (adminReadiness) return await checkLiveConfiguration();
     const isLive = !adminTest;
     if (isLive && (!LIVE_RELEASE_APPROVED || Deno.env.get("CARNET_LIVE_SALES_ENABLED") !== "true")) {
       return json({ error: "Les ventes ne sont pas encore ouvertes." }, 503);
