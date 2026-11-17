@@ -2,13 +2,25 @@
 
 État : ventes fermées. Le paiement test à 37 € a été confirmé. Aucun paiement réel de bout en bout validé.
 
-## Configuration restant à effectuer
+## État vérifié au 17 novembre 2026
 
-1. Créer dans Stripe en production le tarif unique de 37 EUR et obtenir son identifiant price_. Le tarif de sandbox ne convient pas.
-2. Configurer les secrets dans Supabase, hors conversation : STRIPE_LIVE_SECRET_KEY, STRIPE_LIVE_PRICE_ID, STRIPE_LIVE_WEBHOOK_SECRET. Conserver séparément les secrets de test existants.
-3. Configurer dans Stripe production le webhook https://mzkuyhylnalkpismzmef.supabase.co/functions/v1/stripe-webhook pour checkout.session.completed et checkout.session.async_payment_succeeded.
-4. Préparer le mail de confirmation et le parcours de retour dans le carnet. Vérifier les documents commerciaux et le traitement des remboursements avant ouverture.
-5. Après décision explicite d’ouverture, passer LIVE_RELEASE_APPROVED à true dans les deux fonctions, déployer, définir CARNET_LIVE_SALES_ENABLED=true, puis ouvrir checkoutEnabled côté interface. Vérifier un premier paiement réel contrôlé et l’accès associé. Ne pas déclarer la production validée avant ce contrôle.
+- Tarif de production de 37 EUR créé : price_1UboqaHM3OSYChuPVS1O1BQT.
+- Contrôle administratrice réussi : clé de production au bon format, lecture du tarif exact, 37 EUR, paiement unique.
+- Secret de signature configuré ; cela ne valide pas encore la signature d’un événement réel.
+- Destination Stripe de production créée pour checkout.session.completed et checkout.session.async_payment_succeeded, vers https://mzkuyhylnalkpismzmef.supabase.co/functions/v1/stripe-webhook.
+- Paiement de test confirmé le 16 novembre 2026 à 21:28 UTC. Aucun prélèvement réel et aucune activation d’accès par ce test.
+- Texte de l’email d’accès préparé dans emails/acces-apres-achat.md. L’envoi automatique n’est pas branché.
+
+## À finaliser avant ouverture
+
+1. Brancher l’email après activation réussie, avec protection contre les doublons et reprise d’un échec d’envoi. Aucun envoi autorisé par cette seule préparation.
+2. Vérifier sur téléphone le parcours de connexion, le jour 1, l’enregistrement, la reprise au même compte et le bilan PDF.
+3. Ajouter le lien privé du Cercle Aligné dans la ressource membres ; ne pas le publier dans la configuration publique.
+4. Vérifier les documents commerciaux remis à l’achat et le traitement des remboursements.
+5. Après décision explicite d’ouverture, passer LIVE_RELEASE_APPROVED à true dans les deux fonctions, déployer, définir CARNET_LIVE_SALES_ENABLED=true, puis ouvrir checkoutEnabled côté interface. Contrôler la confirmation du premier achat client réel et l’accès associé. Ne pas utiliser de carte réelle pour simuler un achat de test en production.
+6. Ne pas déclarer le paiement réel de bout en bout validé avant ce contrôle.
+
+Les ventes restent fermées. Les bons cadeaux de colorimétrie constituent un produit distinct et ne doivent jamais activer un accès au carnet.
 
 ## Garanties du code préparé
 
