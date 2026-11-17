@@ -1,6 +1,17 @@
 /* PDF local : aucune réponse ni photo n’est envoyée à un service de conversion. */
 (function(global){
 'use strict';
+let fontPromise;
+function loadFonts(){
+ if(!fontPromise)fontPromise=Promise.all(['Regular','Bold'].map(async weight=>{
+  const response=await fetch('assets/fonts/Montserrat-'+weight+'.ttf');
+  if(!response.ok)throw new Error('La police du PDF ne se charge pas. Vérifiez votre connexion et réessayez.');
+  const bytes=new Uint8Array(await response.arrayBuffer());
+  let binary='';for(let i=0;i<bytes.length;i+=32768)binary+=String.fromCharCode(...bytes.subarray(i,i+32768));
+  return {weight,data:btoa(binary)};
+ })).catch(error=>{fontPromise=null;throw error;});
+ return fontPromise;
+}
 function clean(value){
  return String(value||'').replace(/\u00a0|\u202f/g,' ').replace(/[\u2018\u2019]/g,"'").replace(/[\u201c\u201d]/g,'"').replace(/[\u2013\u2014]/g,'-').replace(/[^\u0009\u000a\u000d\u0020-\u00ff\u0152\u0153\u20ac]/g,'').trim();
 }
@@ -17,6 +28,7 @@ function readSheet(root,tips){
    intro:text(section.querySelector('.bilan-section-heading p')),
    items:Array.from(section.querySelectorAll('.bilan-item'),item=>({
     title:text(item.querySelector('h3,h4')),
+    pending:!!item.classList?.contains('to-complete'),
     day:text(item.querySelector('.bilan-item-heading span')),
     // innerText retains user-entered line breaks in the visible preview.
     body:clean(item.querySelector('p')?.innerText||item.querySelector('p')?.textContent)
@@ -48,15 +60,17 @@ async function create(root,tips){
  if(!global.jspdf?.jsPDF)throw new Error('Le module PDF ne s’est pas chargé. Fermez puis rouvrez le carnet avec une connexion Internet.');
  const model=readSheet(root,tips);
  if(!model.title||!model.sections.length)throw new Error('Le document n’est pas encore prêt.');
+ const fonts=await loadFonts();
  const images=[];for(const photo of model.photos)images.push(await imageData(photo));
  const doc=new global.jspdf.jsPDF({unit:'mm',format:'a4',compress:true});
+ for(const font of fonts){const name='Montserrat-'+font.weight+'.ttf';doc.addFileToVFS(name,font.data);doc.addFont(name,'Montserrat',font.weight==='Bold'?'bold':'normal');}
  doc.setProperties({title:model.title,author:'Aligner Conseil',subject:tips?'Mes 21 conseils':'Ma boussole style'});
  const left=17,width=176,bottom=276;let y=22;
  const page=()=>{doc.addPage();y=20};
  const ensure=h=>{if(y+h>bottom)page()};
  function paragraph(value,size=11,bold=false,color=[35,61,56]){
   if(!value)return;
-  doc.setFont('helvetica',bold?'bold':'normal');doc.setFontSize(size);doc.setTextColor(...color);
+  doc.setFont('Montserrat',bold?'bold':'normal');doc.setFontSize(size);doc.setTextColor(...color);
   const lines=doc.splitTextToSize(clean(value),width);const step=size*0.3528*1.45;
   for(const line of lines){ensure(step);doc.text(line,left,y);y+=step;}
   y+=3;
@@ -66,11 +80,17 @@ async function create(root,tips){
  paragraph(model.intro,11);
  for(const identity of model.identity)paragraph(identity,10);
  y+=3;
+ function height(value,size,bold=false){
+  if(!value)return 0;doc.setFont('Montserrat',bold?'bold':'normal');doc.setFontSize(size);
+  return doc.splitTextToSize(clean(value),width).length*size*0.3528*1.45+3;
+ }
  for(const section of model.sections){
-  ensure(24);paragraph(section.title,15,true,[11,73,63]);paragraph(section.intro,10);
+  const first=section.items[0];
+  // Keep a section heading, its intro and the first item together.
+  ensure(height(section.title,15,true)+height(section.intro,10)+(first?height([first.day,first.title].filter(Boolean).join(' | '),11,true)+Math.min(height(first.body,11),17)+8:0));paragraph(section.title,15,true,[11,73,63]);paragraph(section.intro,10);
   for(const item of section.items){
-   ensure(23);paragraph([item.day,item.title].filter(Boolean).join(' | '),11,true,[164,43,80]);
-   paragraph(item.body,11);y+=2;
+   ensure(height([item.day,item.title].filter(Boolean).join(' | '),11,true)+Math.min(height(item.body,11),17)+5);paragraph([item.day,item.title].filter(Boolean).join(' | '),11,true,[164,43,80]);
+   paragraph((item.pending?'À compléter : ':'')+item.body,item.pending?10:11,false,item.pending?[100,110,105]:[35,61,56]);y+=2;
   }
  }
  if(model.disclaimer){ensure(18);paragraph(model.disclaimer,9,false,[90,105,99]);}
@@ -82,7 +102,7 @@ async function create(root,tips){
   paragraph(image.caption,10);y+=8;
  }
  const count=doc.getNumberOfPages();
- for(let p=1;p<=count;p++){doc.setPage(p);doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(90,105,99);doc.text('Aligner Conseil',left,287);doc.text(p+' / '+count,193,287,{align:'right'});}
+ for(let p=1;p<=count;p++){doc.setPage(p);doc.setFont('Montserrat','normal');doc.setFontSize(9);doc.setTextColor(90,105,99);doc.text('Aligner Conseil',left,287);doc.text(p+' / '+count,193,287,{align:'right'});}
  return {blob:doc.output('blob'),filename:tips?'Mes-21-conseils-Aligner-Conseil.pdf':'Ma-boussole-style-Aligner-Conseil.pdf'};
 }
 async function share(file){

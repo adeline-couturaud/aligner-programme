@@ -6,7 +6,7 @@ const base=process.env.PDF_TEST_BASE||path.join(__dirname,'..');
 const vendor=process.env.PDF_TEST_VENDOR||path.join(base,'vendor/jspdf-4.2.1.umd.min.js');
 const {jsPDF}=require(vendor);
 const node=(value)=>({textContent:value,innerText:value});
-const item=(i,long=false)=>({querySelector(s){if(s==='h3,h4')return node('Repère '+i);if(s==='.bilan-item-heading span')return node('JOUR '+i);if(s==='p')return node(long?'Une réponse personnelle très longue avec détails, matières et ajustements. '.repeat(300):'Mon repère '+i+' : préférer le bleu, essayer, ajuster.');}});
+const item=(i,long=false)=>({classList:{contains:()=>i>2},querySelector(s){if(s==='h3,h4')return node('Repère '+i);if(s==='.bilan-item-heading span')return node('JOUR '+i);if(s==='p')return node(long?'Une réponse personnelle très longue avec détails, matières et ajustements. '.repeat(300):'Mon repère '+i+' : préférer le bleu, essayer, ajuster.');}});
 const section=(start,end,long=false)=>({querySelector(s){return s==='h2,h3'?node('Mes choix du quotidien'):null},querySelectorAll(){return Array.from({length:end-start+1},(_,i)=>item(start+i,long&&i===0));}});
 function fixture(tips,long=false){
  const sheet={querySelector(s){return s.includes(' h1')||s.includes(' h2')?node(tips?'Mes 21 conseils':'Ma boussole style'):node('Des repères à conserver.');},querySelectorAll(s){return s==='.bilan-identity span'?[node('Mon carnet : Test synthétique')]:[section(1,7,long),section(8,14),section(15,21)];}};
@@ -15,7 +15,10 @@ function fixture(tips,long=false){
 (async()=>{
  const navigator={};
  const window={jspdf:{jsPDF}};
- vm.runInNewContext(fs.readFileSync(path.join(base,'pdf-export.js'),'utf8'),{window,navigator,Image:class{},setTimeout,clearTimeout,document:{}});
+ let fontRequests=0;
+ const fetch=async url=>{fontRequests++;return fontFetch(url)};
+ const fontFetch=async url=>{const weight=url.includes('Bold')?'Bold':'Regular';const file=process.env.PDF_TEST_FONT_DIR?path.join(process.env.PDF_TEST_FONT_DIR,'font-'+weight.toLowerCase()+'.ttf'):path.join(base,'assets/fonts/Montserrat-'+weight+'.ttf');const bytes=fs.readFileSync(file);return {ok:true,arrayBuffer:async()=>bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength)};};
+ vm.runInNewContext(fs.readFileSync(path.join(base,'pdf-export.js'),'utf8'),{window,navigator,fetch,btoa,Image:class{},setTimeout,clearTimeout,document:{}});
  for(const tips of [false,true]){
   const result=await window.CarnetPDF.create(fixture(tips,true),tips);
   assert.equal(result.blob.type,'application/pdf');
@@ -24,6 +27,8 @@ function fixture(tips,long=false){
   assert(bytes.length>5000);
   if(process.env.PDF_TEST_OUTPUT)fs.writeFileSync(path.join(process.env.PDF_TEST_OUTPUT,tips?'tips.pdf':'bilan.pdf'),bytes);
  }
+ assert.equal(fontRequests,2,'Fonts must be reused between exports');
+ assert.equal(window.CarnetPDF.readSheet(fixture(false),false).sections[0].items[2].pending,true);
  let shared=0;
  navigator.canShare=()=>true;navigator.share=async()=>{shared++};
  assert.equal(await window.CarnetPDF.share({name:'test.pdf'}),true);assert.equal(shared,1);
