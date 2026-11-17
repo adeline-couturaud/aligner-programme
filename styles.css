@@ -345,3 +345,8 @@ details[open]>summary.disclosure-trigger{margin-bottom:16px;background:#f3f7f4;b
 @media(max-width:640px){.install-carnet-card>.btn{width:100%}.install-carnet-dialog{padding:20px;font-size:16px}}
 @media(display-mode:standalone){.sidebar{padding-top:max(13px,env(safe-area-inset-top))}.content{padding-bottom:max(40px,env(safe-area-inset-bottom))}}
 @media print{.install-carnet-card,.install-carnet-access,.install-carnet-dialog{display:none!important}}
+
+/* PDF mobile : respecter le masquage du lien avant création du fichier. */
+#downloadBilanPdf[hidden]{display:none!important}
+#bilanPdfStatus{flex-basis:100%;margin:0;overflow-wrap:anywhere}
+@media print{body.bilan-print-open>footer{display:none!important}}

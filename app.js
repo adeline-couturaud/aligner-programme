@@ -307,7 +307,7 @@ function bilanHTML(){
  '<section class="bilan-export-panel"><div><h2>Je garde ma boussole style</h2><p>Votre document rassemble vos propres réponses. Vous pouvez le consulter dès maintenant, même si les 21 journées ne sont pas terminées. Il se met à jour au fil de votre parcours.</p>'+
  (photos.length?'<label class="bilan-photo-consent"><input id="bilanPhotos" type="checkbox"><span>Ajouter jusqu’à 6 de mes photos personnelles dans le document imprimable</span></label>':'<p class="muted">Vous pourrez ajouter des photos à vos exercices si vous le souhaitez. Elles restent privées par défaut.</p>')+
  '<p class="muted">Les photos ne sont incluses que si vous cochez cette option. Ce document ne contient aucun diagnostic automatique de morphologie ou de colorimétrie.</p></div>'+
- '<div class="bilan-export-actions"><button class="btn pink" id="downloadBilan">Ouvrir mon bilan pour l’enregistrer en PDF ↗</button><p class="muted">Une page imprimable s’ouvrira. Choisissez « Imprimer », puis « Enregistrer au format PDF ».</p></div></section>'+
+ '<div class="bilan-export-actions"><button class="btn pink" id="downloadBilan">Ouvrir mon bilan pour l’enregistrer en PDF ↗</button><p class="muted">Un aperçu s’ouvrira, avec un fichier PDF à enregistrer ou partager.</p></div></section>'+
  '<div class="community"><h2>Et si j’avais envie d’un regard professionnel personnalisé ?</h2><p>Ce bilan reflète vos découvertes personnelles. Un rendez-vous avec Adeline peut permettre d’aller plus loin grâce à une analyse individualisée, des essais guidés et des conseils adaptés à vos objectifs.</p><div class="actions"><button class="btn pink" data-nav="services">Découvrir les accompagnements</button><button class="btn outline" data-nav="services">Explorer le bilan d’image personnalisé</button></div></div>';
 }
 
@@ -326,7 +326,9 @@ function servicesHTML(){
 }
 
 
+let bilanPdfUrl='';
 function closeBilanPreview(){
+ if(bilanPdfUrl){URL.revokeObjectURL(bilanPdfUrl);bilanPdfUrl='';}
  const preview=document.getElementById('bilan-print-overlay');
  if(preview)preview.remove();
  document.body.classList.remove('bilan-print-open');
@@ -346,7 +348,7 @@ function exportBilan(sourceSelector){
   preview.setAttribute('role','dialog');
   preview.setAttribute('aria-modal','true');
   preview.setAttribute('aria-label',tips?'Aperçu de mes 21 conseils':'Aperçu de ma boussole style');
-  preview.innerHTML='<header class="bilan-print-toolbar"><div><strong>'+(tips?'Mes 21 conseils à conserver':'Aperçu de votre boussole style')+'</strong><p>Vérifiez votre document puis cliquez sur « Imprimer / Enregistrer en PDF ». Sur Mac, choisissez PDF dans les options d’impression.</p></div><div class="bilan-print-actions"><button type="button" class="btn pink" id="printBilanNow">Imprimer / Enregistrer en PDF</button><button type="button" class="btn outline" id="closeBilanPreview">Fermer l’aperçu</button></div></header><div class="bilan-print-content"></div>';
+  preview.innerHTML='<header class="bilan-print-toolbar"><div><strong>'+(tips?'Mes 21 conseils à conserver':'Aperçu de votre boussole style')+'</strong><p>Préparez votre PDF, puis enregistrez-le. Sur iPhone, choisissez « Enregistrer dans Fichiers » dans le menu de partage. L’impression classique reste disponible.</p></div><div class="bilan-print-actions"><button type="button" class="btn pink" id="saveBilanPdf" disabled>Préparation du PDF…</button><a class="btn outline" id="downloadBilanPdf" hidden target="_blank" rel="noopener noreferrer">Télécharger le PDF</a><button type="button" class="btn outline" id="printBilanNow">Imprimer</button><button type="button" class="btn outline" id="closeBilanPreview">Fermer l’aperçu</button></div><p id="bilanPdfStatus" class="status" role="status" aria-live="polite">Création de votre PDF sur cet appareil…</p></header><div class="bilan-print-content"></div>';
   const content=preview.querySelector('.bilan-print-content');
   content.appendChild(sheet);
   if(photos.length){
@@ -363,9 +365,41 @@ function exportBilan(sourceSelector){
   document.body.classList.add('bilan-print-open');
   preview.querySelector('#printBilanNow').addEventListener('click',()=>{try{window.print()}catch(err){toast('Impossible d’ouvrir la fonction d’impression : '+err.message)}});
   preview.querySelector('#closeBilanPreview').addEventListener('click',closeBilanPreview);
-  preview.querySelector('#printBilanNow').focus();
+  preview.querySelector('#closeBilanPreview').focus();
+  prepareBilanPdf(preview,tips);
   preview.scrollTop=0;
  }catch(err){closeBilanPreview();toast('Impossible de préparer le bilan : '+err.message)}
+}
+
+async function prepareBilanPdf(preview,tips){
+ const button=preview.querySelector('#saveBilanPdf');
+ const link=preview.querySelector('#downloadBilanPdf');
+ const status=preview.querySelector('#bilanPdfStatus');
+ button.disabled=true;button.textContent='Préparation du PDF…';
+ try{
+  if(!window.CarnetPDF)throw new Error('Le module PDF ne s’est pas chargé. Fermez puis rouvrez le carnet.');
+  const result=await window.CarnetPDF.create(preview,tips);
+  if(!preview.isConnected)return;
+  if(bilanPdfUrl)URL.revokeObjectURL(bilanPdfUrl);
+  bilanPdfUrl=URL.createObjectURL(result.blob);
+  link.href=bilanPdfUrl;link.download=result.filename;link.hidden=false;
+  // A second, explicit tap preserves user activation for the iPhone share sheet.
+  const file=typeof File==='function'?new File([result.blob],result.filename,{type:'application/pdf'}):null;
+  button.disabled=false;button.textContent='Enregistrer / Partager le PDF';
+  status.textContent='Votre PDF est prêt. Sur iPhone : Enregistrer / Partager le PDF, puis Enregistrer dans Fichiers. Vous pouvez aussi utiliser Télécharger le PDF.';
+  button.onclick=async()=>{
+   try{
+    if(!file||!await window.CarnetPDF.share(file))link.click();
+   }catch(err){
+    if(err.name==='AbortError'){status.textContent='Partage annulé. Votre PDF reste disponible.';return;}
+    status.textContent='Le partage n’a pas démarré. Utilisez Télécharger le PDF ci-dessus.';
+   }
+  };
+ }catch(err){
+  if(!preview.isConnected)return;
+  status.textContent='Création impossible : '+err.message;
+  button.disabled=false;button.textContent='Réessayer le PDF';button.onclick=()=>prepareBilanPdf(preview,tips);
+ }
 }
 
 function communityHTML(){return `<span class="badge rose">ENTRE NOUS</span><h1>Le Cercle Aligné</h1><p class="lead">Un espace d'échanges, de petits défis et de soutien mutuel. Les membres peuvent partager leurs photos ou leurs découvertes si elles le souhaitent. La participation est facultative.</p><div class="grid"><div class="card"><h3>Bienveillance</h3><p>On commente les idées, pas les corps. Aucun jugement, aucune comparaison.</p></div><div class="card"><h3>Choix du partage</h3><p>Aucune obligation de montrer son visage ni sa tenue. On peut participer avec des mots seulement.</p></div><div class="card"><h3>Pas de diagnostic collectif</h3><p>Les échanges ne remplacent ni un draping professionnel ni un rendez-vous individuel.</p></div></div><div class="community"><h2>Rejoindre la communauté WhatsApp</h2>${(LIVE?state.whatsappInviteUrl:CFG.whatsappInviteUrl)?`<p>Le groupe est facultatif. Avant de rejoindre : les autres membres d'un groupe peuvent voir votre numéro et les contenus que vous publiez.</p><a class="btn" target="_blank" rel="noopener noreferrer" href="${esc(LIVE?state.whatsappInviteUrl:CFG.whatsappInviteUrl)}">Rejoindre le Cercle Aligné ↗</a>`:`<p>Le lien d'accès sera ajouté après la création et la modération du groupe. Le programme reste accessible sans WhatsApp.</p><span class="badge gold">Communauté en préparation</span>`}</div><h2 style="margin-top:30px">Règles du Cercle</h2><p class="lead">Pas de capture ni de transfert des photos des autres. Pas de publicité ni de sollicitation privée sans accord. On respecte la confidentialité des échanges. Adeline anime la communauté sans garantir une réponse personnelle à chaque publication.</p>`}
