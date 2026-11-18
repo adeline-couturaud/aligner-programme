@@ -61,3 +61,11 @@ node supabase/tests/access-email.test.cjs
 node supabase/tests/live-payment/check.cjs
 ```
 Exécuter supabase/tests/test_paid_access_email.sql et supabase/tests/test_activate_paid_enrollment.sql en conservant BEGIN/ROLLBACK.
+
+## Aperçu réel de l’email, sans paiement
+
+Dans l’espace professionnel, le bouton Recevoir l’email de test appelle test-access-email. La fonction exige un compte administratrice vérifié en base et une adresse confirmée. Elle ignore tout destinataire ou contenu transmis par le navigateur. L’aperçu est marqué TEST et ne crée ni commande, ni accès, ni message dans la file des achats. Le modèle reprend le message d’accès. La clé Resend est stable par compte et par jour UTC afin d’éviter les doubles clics. Aucun aperçu n’est envoyé automatiquement lors du chargement de la page.
+
+Vérifier l’arrivée du message, sa présentation sur téléphone et le lien du carnet. En cas de message accepté mais absent, vérifier les indésirables et le suivi Resend ; ne pas conclure à une réception en boîte de réception sur la seule réponse API.
+
+Test : node supabase/tests/access-email-preview.test.cjs (tous les envois simulés).

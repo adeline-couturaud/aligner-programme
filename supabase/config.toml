@@ -6,3 +6,6 @@ verify_jwt = false
 
 [functions.request-withdrawal]
 verify_jwt = true
+
+[functions.test-access-email]
+verify_jwt = true
