@@ -1,0 +1,20 @@
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const vm=require('node:vm');
+const source=fs.readFileSync(__dirname+'/../app.js','utf8');
+const helpers=source.slice(source.indexOf('function bootMessage'),source.indexOf('async function setupLive'));
+const init=source.slice(source.lastIndexOf('async function init(){'),source.lastIndexOf('init();'));
+async function run(){
+ let aborted=false;
+ const ctx={setTimeout:(f,ms)=>setTimeout(f,Math.min(ms,15)),clearTimeout,AbortController,fetch:async(_i,o)=>new Promise((_r,j)=>o.signal.addEventListener('abort',()=>{aborted=true;j(new Error('abort'));})),document:{getElementById:()=>null},root:{dataset:{},innerHTML:''},isDemo:()=>false,LIVE:true,setupLive:()=>new Promise(()=>{}),render:()=>{ctx.rendered=true},esc:s=>s};
+ vm.createContext(ctx);vm.runInContext(helpers+init,ctx);
+ await assert.rejects(ctx.withDeadline(new Promise(()=>{}),30000,'timeout'),/timeout/);
+ await assert.rejects(ctx.carnetFetch('https://example.invalid'),/connexion prend trop de temps/);assert.ok(aborted);
+ await ctx.init();assert.equal(ctx.root.dataset.boot,'error');assert.match(ctx.root.innerHTML,/Réessayer/);assert.match(ctx.root.innerHTML,/réponses enregistrées sont conservées/);assert.equal(ctx.rendered,undefined);
+ ctx.setupLive=async()=>{};await ctx.init();assert.equal(ctx.root.dataset.boot,'ready');assert.equal(ctx.rendered,true);
+ ctx.fetch=async()=>({ok:true});assert.equal((await ctx.carnetFetch('x')).ok,true);
+ const signal=new AbortController();signal.abort();ctx.fetch=async(_i,o)=>{assert.equal(o.signal.aborted,true);throw new Error('caller cancelled')};await assert.rejects(ctx.carnetFetch('x',{signal:signal.signal}),/caller cancelled/);
+ const index=fs.readFileSync(__dirname+'/../index.html','utf8');assert.match(index,/data-boot="loading"/);assert.match(index,/raccourci est facultatif/);
+ const pwa=fs.readFileSync(__dirname+'/../pwa.js','utf8');assert.match(pwa,/access.hidden=standalone\|\|app.dataset.boot!=='ready'/);assert.match(pwa,/attributeFilter:\['data-boot'\]/);
+ console.log('PASS: délai de chargement, réseau bloqué, annulation, reprise, conservation de session et raccourci facultatif.');
+}run().catch(e=>{console.error(e);process.exitCode=1});

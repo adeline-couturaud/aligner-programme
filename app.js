@@ -23,14 +23,32 @@ function openDB(){return new Promise((resolve,reject)=>{const req=indexedDB.open
 async function demoPhotos(){if(!('indexedDB' in window))return;try{const db=await openDB(); const rows=await new Promise((resolve,reject)=>{let t=db.transaction('photos','readonly');let req=t.objectStore('photos').getAll();req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)});state.photos={}; for(let p of rows){const t={id:p.id,day:p.day,name:p.name,url:URL.createObjectURL(p.blob)};(state.photos[p.day]??=[]).push(t)}db.close();}catch(err){console.warn('Photos démo indisponibles',err)}}
 async function demoAddPhoto(day,file){const id=crypto.randomUUID();const db=await openDB();await new Promise((resolve,reject)=>{let t=db.transaction('photos','readwrite');t.objectStore('photos').put({id,day,name:file.name,blob:file});t.oncomplete=resolve;t.onerror=()=>reject(t.error)});db.close();(state.photos[day]??=[]).push({id,day,name:file.name,url:URL.createObjectURL(file)});}
 async function demoDeletePhoto(id){const db=await openDB();await new Promise((resolve,reject)=>{let t=db.transaction('photos','readwrite');t.objectStore('photos').delete(id);t.oncomplete=resolve;t.onerror=()=>reject(t.error)});db.close()}
+
+function bootMessage(message){
+ const text=document.getElementById('carnet-loading-message');if(text)text.textContent=message;
+}
+async function withDeadline(work,ms,message){
+ let timeout;try{return await Promise.race([work,new Promise((_,reject)=>{timeout=setTimeout(()=>reject(new Error(message)),ms)})])}finally{clearTimeout(timeout)}
+}
+async function carnetFetch(input,options={}){
+ const controller=new AbortController();const signal=options.signal;
+ const abort=()=>controller.abort(signal.reason);
+ if(signal?.aborted)abort();else signal?.addEventListener('abort',abort,{once:true});
+ const timeout=setTimeout(()=>controller.abort(),15000);
+ try{return await fetch(input,{...options,signal:controller.signal})}
+ catch(error){if(controller.signal.aborted&&!signal?.aborted)throw new Error('La connexion prend trop de temps. Réessayez dans quelques instants.');throw error}
+ finally{clearTimeout(timeout);signal?.removeEventListener('abort',abort)}
+}
+
 async function setupLive(){
+ bootMessage("Connexion sécurisée au carnet…");
  const {createClient}=await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
- state.supabase=createClient(CFG.supabaseUrl,CFG.supabasePublishableKey,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}});
+ state.supabase=createClient(CFG.supabaseUrl,CFG.supabasePublishableKey,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true},global:{fetch:carnetFetch}});
  state.supabase.auth.onAuthStateChange((event)=>{
   if(event==='PASSWORD_RECOVERY'){state.authForm='recovery';render();}
  });
  const {data:{user},error}=await state.supabase.auth.getUser();if(error&&error.status!==400)throw error;
- state.user=user;if(user)await refreshLive();
+ state.user=user;if(user){bootMessage("Chargement de votre parcours…");await refreshLive();}
  if(user&&new URLSearchParams(location.search).get('paiement')==='succes'){
   // Stripe confirme le paiement par webhook côté serveur ; l'arrivée sur la page ne donne aucun accès.
   let attempt=0;const check=async()=>{if(state.enrolled||attempt++>=10)return;
@@ -579,10 +597,19 @@ function bindProfile(){
 }
 function downloadBlob(name,bytes,type){const blob=bytes instanceof Blob?bytes:new Blob([bytes],{type});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),10000)}
 
-async function init(){if(isDemo()){restoreDemo();await demoPhotos();render();return}if(!LIVE){root.innerHTML='<div class="auth-wrap"><div class="auth-card"><h1>Configuration Supabase requise</h1><p>Renseignez config.js avec l’URL et la clé publique Supabase. Vous pouvez activer demoMode uniquement pour tester en local.</p></div></div>';return}try{await setupLive();render()}catch(e){root.innerHTML=`<div class="auth-wrap"><div class="auth-card"><h1>Impossible d’ouvrir le programme</h1><p>${esc(e.message)}</p><p>Vérifiez la configuration Supabase et les politiques d'accès.</p></div></div>`}}
+async function init(){
+ try{
+  if(isDemo()){restoreDemo();await demoPhotos();render();}
+  else if(!LIVE){throw new Error('Le carnet est temporairement indisponible.');}
+  else{
+   await withDeadline(setupLive(),30000,'Le chargement n’a pas abouti. Votre connexion peut être momentanément interrompue.');
+   render();
+  }
+  root.dataset.boot='ready';
+ }catch(e){
+  root.dataset.boot='error';
+  root.innerHTML=`<div class="auth-wrap"><div class="auth-card"><h1>Le carnet n’a pas pu s’ouvrir</h1><p>${esc(e.message||'La connexion a été interrompue.')}</p><p>Vos réponses enregistrées sont conservées. Aucun raccourci n’est nécessaire pour accéder au carnet.</p><a class="btn" href="./">Réessayer d’ouvrir le carnet</a><p>Si vous venez d’un email, ouvrez ce lien dans Safari, Chrome ou votre navigateur habituel.</p></div></div>`;
+ }
+}
 init();
 })();
-
-
-
-

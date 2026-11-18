@@ -11,13 +11,13 @@
  function sync(){
   const standalone=installed();
   if(standalone)document.querySelectorAll('.install-carnet-card').forEach(c=>c.remove());
-  access.hidden=standalone;
+  access.hidden=standalone||app.dataset.boot!=='ready';
   document.querySelectorAll('[data-install-carnet]').forEach(b=>{b.hidden=standalone;});
   const content=app.querySelector('.content');
   if(!standalone&&content?.querySelector('.home-promise')&&!content.querySelector('.install-carnet-card')){
    const card=document.createElement('aside');
    card.className='install-carnet-card';
-   card.innerHTML='<img src="assets/carnet-icon-192.png" alt="" width="48" height="48"><div><strong>Votre carnet à portée de main</strong><p>Ajoutez son icône sur votre téléphone pour le retrouver chaque jour.</p></div><button type="button" class="btn outline" data-install-carnet>Installer le carnet</button>';
+   card.innerHTML='<img src="assets/carnet-icon-192.png" alt="" width="48" height="48"><div><strong>Votre carnet à portée de main</strong><p>Facultatif : ajoutez son icône sur votre téléphone pour le retrouver chaque jour.</p></div><button type="button" class="btn outline" data-install-carnet>Ajouter un raccourci</button>';
    content.prepend(card);
   }
  }
@@ -46,7 +46,7 @@
  window.addEventListener('beforeinstallprompt',event=>{event.preventDefault();installPrompt=event;sync();});
  window.addEventListener('appinstalled',()=>{installPrompt=null;access.hidden=true;document.querySelectorAll('.install-carnet-card').forEach(c=>c.remove());if(dialog.open)dialog.close();});
  mode.addEventListener?.('change',sync);
- new MutationObserver(sync).observe(app,{childList:true});
+ new MutationObserver(sync).observe(app,{childList:true,attributes:true,attributeFilter:['data-boot']});
  sync();
  if('serviceWorker' in navigator&&window.isSecureContext){
   navigator.serviceWorker.register('./sw.js',{scope:'./',updateViaCache:'none'}).catch(()=>{
