@@ -1,6 +1,6 @@
 # Email d’accès après achat
 
-Statut : texte prêt, envoi automatique non branché. Aucun message envoyé.
+Statut au 18 novembre 2026 : envoi automatique branché après activation réelle, ventes toujours fermées. Tests simulés et SQL validés ; aucun nouvel email envoyé. Réception réelle du message encore à vérifier.
 
 Objet : Votre Carnet Aligné est prêt
 

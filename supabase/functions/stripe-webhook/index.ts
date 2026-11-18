@@ -1,6 +1,8 @@
 
 import { createClient } from "npm:@supabase/supabase-js@2";
 
+import { sendPaidAccessEmail } from "./access-email.js";
+
 const LAUNCH_AMOUNT_CENTS = 3700;
 // À changer uniquement lors de l’ouverture explicitement validée des ventes.
 const LIVE_RELEASE_APPROVED = false;
@@ -125,7 +127,11 @@ Deno.serve(async (req: Request) => {
       p_currency: "eur",
     });
     if (activationError) throw activationError;
-    console.info("Verified Stripe LIVE payment; enrollment processed");
+    const accessEmail = await sendPaidAccessEmail({
+      db: supabase, userId, sessionId: session.id,
+      resendKey: Deno.env.get("RESEND_API_KEY") || "",
+    });
+    console.info("Verified Stripe LIVE payment; enrollment processed; access email: " + accessEmail.status);
     return json({ received: true, duplicate: activation?.duplicate === true });
   } catch (e) {
     console.error("Stripe webhook:", e instanceof Error ? e.message : "unknown");

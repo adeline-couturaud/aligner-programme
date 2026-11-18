@@ -54,6 +54,8 @@ begin
     on conflict(user_id) do update
       set status='active', purchased_at=coalesce(public.enrollments.purchased_at,excluded.purchased_at)
       where public.enrollments.status<>'active';
+  insert into private.paid_access_email_outbox(session_id,user_id)
+    values(p_session_id,p_user_id) on conflict(session_id) do nothing;
   return jsonb_build_object('activated',true,'duplicate',false);
 end;
 $function$;
