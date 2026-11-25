@@ -11,7 +11,7 @@ window.ALIGNER_CONFIG = {
   launchPriceEuros: 37,
   futurePriceEuros: 47,
   // Lien « Laisser un avis » de la fiche Google Aligner Conseil (https://...). Vide = encart masqué.
-  reviewUrl: 'https://share.google/JY1MWJXC8Fz3eS8ZF',
+  reviewUrl: 'https://g.page/r/CQ4vndkYNdLTEBM/review',
   checkoutEnabled: false
 };
 
