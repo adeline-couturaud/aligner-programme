@@ -9,7 +9,9 @@ window.ALIGNER_CONFIG = {
   legalUrl: 'https://adeline-couturaud.github.io/aligner-programme/mentions-legales.html',
   termsUrl: 'https://adeline-couturaud.github.io/aligner-programme/cgv.html',
   launchPriceEuros: 37,
-  futurePriceEuros: 87,
+  futurePriceEuros: 47,
+  // Lien « Laisser un avis » de la fiche Google Aligner Conseil (https://...). Vide = encart masqué.
+  reviewUrl: '',
   checkoutEnabled: false
 };
 

@@ -350,3 +350,15 @@ details[open]>summary.disclosure-trigger{margin-bottom:16px;background:#f3f7f4;b
 #downloadBilanPdf[hidden]{display:none!important}
 #bilanPdfStatus{flex-basis:100%;margin:0;overflow-wrap:anywhere}
 @media print{body.bilan-print-open>footer{display:none!important}}
+/* Ajouts 2026-11-25 : essentiel du jour, passerelle, avantage cliente, avis, partage replié */
+.essentiel-box{margin:0 0 24px;padding:18px 22px;border-radius:16px;background:#eaf2ed;border-left:5px solid var(--green);color:var(--green)}
+.essentiel-box strong{display:block;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;margin-bottom:6px}
+.essentiel-box p{margin:0 0 6px;font-size:1.02rem;line-height:1.65;color:var(--ink)}
+.essentiel-box small{font-size:.78rem}
+.bridge-box{margin:22px 0}
+.carnet-advantage{margin:22px 0;background:#fffaf0;border-color:#f3dfa9}
+.carnet-advantage h2{margin:10px 0 8px}
+.review-ask{margin:26px 0;text-align:left}
+.review-ask h2{margin:10px 0 8px}
+.share-more{margin-top:6px}
+.share-more summary{cursor:pointer;font-size:.77rem;font-weight:700;color:#735968}
